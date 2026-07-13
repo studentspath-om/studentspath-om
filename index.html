@@ -2,115 +2,139 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>محطة الدراسة المتكاملة</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محطة الدراسة</title>
     <style>
-        :root { --soft-blue: #a8d8ea; --paper-bg: #fffcf2; --accent: #ffb7b2; --text: #333; }
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--soft-blue); min-height: 100vh; display: flex; flex-direction: column; align-items: center; color: var(--text); }
-        .screen { display: none; opacity: 0; transition: opacity 0.5s; padding: 40px; width: 100%; flex-direction: column; align-items: center; }
-        .active { display: flex; opacity: 1; }
-        
-        .btn { background: white; border: 4px solid var(--accent); padding: 40px 80px; border-radius: 50px; font-weight: bold; font-size: 2.5rem; cursor: pointer; margin: 20px; width: 90%; max-width: 800px; box-shadow: 10px 10px 0px var(--accent); text-align: center; }
-        .btn:hover { background: var(--accent); color: white; }
-        
-        .card { background: var(--paper-bg); padding: 50px; margin: 30px; border-radius: 60px; width: 95%; max-width: 1000px; box-shadow: 20px 20px 40px rgba(0,0,0,0.1); text-align: center; }
-        
-        h1, h2, h3 { font-size: 3.5rem; color: #222; }
-        input { padding: 30px; border-radius: 30px; border: 4px solid var(--soft-blue); width: 300px; text-align: center; font-size: 3rem; }
-        
-        .editable { border-bottom: 3px dashed #777; min-height: 150px; padding: 20px; font-size: 2.5rem; text-align: right; background: #fffdfa; margin-top: 20px; }
+        body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #007bff; font-family: sans-serif; }
+        .container { text-align: center; width: 90%; display: none; }
+        .active { display: block; }
+        h1 { color: white; }
+        .btn { background-color: yellow; color: black; border: none; padding: 10px 20px; font-size: 1rem; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; }
+        .back-btn { background-color: #ffcccc; margin-top: 20px; }
+        .timer-display { color: white; font-size: 3rem; margin: 20px; }
+        input { width: 60px; padding: 5px; font-size: 1rem; text-align: center; }
+        table { width: 100%; border-collapse: collapse; color: white; margin-top: 20px; }
+        th, td { border: 1px solid white; padding: 8px; }
+        .reward-card { margin: 10px; padding: 10px; border: 2px solid white; border-radius: 10px; display: inline-block; }
+        .reward-img { width: 100px; height: 100px; object-fit: cover; }
     </style>
 </head>
 <body>
 
-    <!-- S1: Home -->
-    <div id="screen1" class="screen active" onclick="unlockAudio()">
-        <h1>مرحباً بك في مساحتك</h1>
-        <button class="btn" onclick="goTo('screen2')">ابدأ الرحلة</button>
+    <!-- Screen 1: Home -->
+    <div id="screen1" class="container active">
+        <h1>مرحباً بك في محطة الدراسة!</h1>
+        <button class="btn" onclick="showScreen('screen2')">ابدأ</button>
     </div>
 
-    <!-- S2: Grades -->
-    <div id="screen2" class="screen">
-        <h1>اختر صفك</h1>
-        <div id="grades" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
-        <button class="btn" onclick="goTo('screen1')">رجوع</button>
+    <!-- Screen 2: Select Grade -->
+    <div id="screen2" class="container">
+        <h1>صف كم؟</h1>
+        <button class="btn" onclick="showScreen('dashboard')">خامس الى ثامن</button>
+        <button class="btn" onclick="showScreen('dashboard')">تاسع وعاشر</button>
+        <button class="btn back-btn" onclick="showScreen('screen1')">رجوع</button>
     </div>
 
-    <!-- S3: Subjects -->
-    <div id="screen3" class="screen">
-        <h2 id="gradeTitle"></h2>
-        <div id="subjects" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
-        <button class="btn" onclick="goTo('screen2')">رجوع</button>
-    </div>
-
-    <!-- S4: Dashboard -->
-    <div id="screen4" class="screen">
-        <div class="card">
-            <h3>هدف الفصل الدراسي</h3>
-            <div contenteditable="true" class="editable" style="font-size: 4rem; text-align: center;">95%</div>
+    <!-- Dashboard -->
+    <div id="dashboard" class="container">
+        <h1>لوحة تحكم المادة</h1>
+        <div>
+            <label style="color: white;">وقت التركيز:</label>
+            <input type="number" id="focusTime" value="25">
+            <label style="color: white;">وقت الاستراحة:</label>
+            <input type="number" id="breakTime" value="5">
         </div>
-        <div style="display:flex; flex-wrap:wrap; justify-content:center; width: 100%;">
-            <div class="card"><h3>أهداف اليوم</h3><div contenteditable="true" class="editable">1.<br>2.<br>3.</div></div>
-            <div class="card"><h3>أهداف الأسبوع</h3><div contenteditable="true" class="editable">1.<br>2.<br>3.</div></div>
-            <div class="card"><h3>أهداف الشهر</h3><div contenteditable="true" class="editable">1.<br>2.<br>3.</div></div>
-        </div>
-        <button class="btn" style="background:#a8d8ea" onclick="goTo('screenTimer')">ابدأ الدرس الآن</button>
-        <button class="btn" onclick="goTo('screen3')">رجوع</button>
+        <div class="timer-display" id="timer">25:00</div>
+        <button class="btn" onclick="startTimer()">ابدأ</button>
+        <button class="btn" onclick="stopTimer()">إيقاف</button>
+        <button class="btn" onclick="resetTimer()">إعادة تعيين</button>
+        <br><br>
+        <button class="btn" onclick="addLesson()">1 درس تم الانتهاء منه</button>
+        <div style="color: white; font-size: 1.2rem;">إجمالي الدروس المنجزة: <span id="lessonCount">0</span></div>
+        <br>
+        <button class="btn" onclick="showScreen('progress')">التقدم</button>
+        <button class="btn" onclick="updateRewardsScreen()">الجوائز</button>
+        <br>
+        <button class="btn back-btn" onclick="showScreen('screen2')">رجوع</button>
     </div>
 
-    <!-- S5: Timer -->
-    <div id="screenTimer" class="screen">
-        <div class="card">
-            <h1>المؤقت</h1>
-            <input type="number" id="timerInput" value="25">
-            <button class="btn" onclick="startTimer()">ابدأ العمل</button>
-            <h2 id="timeRemaining" style="font-size: 6rem;">00:00</h2>
-            <select id="soundSelect" onchange="loadAndPlaySound()" class="btn">
-                <option value="">اختر صوتاً للمذاكرة...</option>
-                <option value="https://actions.google.com/sounds/v1/weather/rain_heavy_wind.ogg">صوت المطر</option>
-                <option value="https://actions.google.com/sounds/v1/household/fireplace.ogg">صوت المدفأة</option>
-            </select>
-            <button class="btn" onclick="goTo('screen4')">رجوع</button>
-        </div>
+    <!-- Progress Screen -->
+    <div id="progress" class="container">
+        <h1>مستوى التقدم</h1>
+        <table>
+            <tr><th>المادة</th><th>دروسك</th><th>دروس المعلم</th></tr>
+            <tr><td>المادة المختارة</td><td id="myLessons">0</td><td>8</td></tr>
+        </table>
+        <p id="alertMsg" style="color: yellow; font-weight: bold;"></p>
+        <button class="btn back-btn" onclick="showScreen('dashboard')">رجوع</button>
     </div>
 
-    <audio id="audioPlayer" loop></audio>
+    <!-- Rewards Screen -->
+    <div id="rewardsScreen" class="container">
+        <h1>الجوائز</h1>
+        <div id="rewardsList"></div>
+        <button class="btn back-btn" onclick="showScreen('dashboard')">رجوع</button>
+    </div>
 
     <script>
-        // Force audio unlock on first interaction
-        function unlockAudio() {
-            let p = document.getElementById('audioPlayer');
-            p.play().then(() => p.pause()).catch(e => console.log("Waiting for user gesture"));
+        let timeLeft = 25 * 60;
+        let timerId = null;
+        let lessons = 0;
+        const rewards = [
+            { name: "triple T", lessonsRequired: 10, image: "https://i.pinimg.com/736x/f1/3b/d2/f13bd27b74291818995a189fcced5693.jpg" },
+            { name: "cat", lessonsRequired: 20, image: "https://i.pinimg.com/736x/b2/82/66/b28266e613ba53221b1ca4c8c5cbac04.jpg" },
+            { name: "haaland", lessonsRequired: 40, image: "https://i.pinimg.com/736x/d2/8d/72/d28d724a39e65d17b07cd43064047634.jpg" },
+            { name: "timebomb", lessonsRequired: 100, image: "https://i.pinimg.com/736x/45/ad/8f/45ad8fdefdc24c2ca7221398c63a0e4c.jpg" }
+        ];
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.container').forEach(div => div.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
         }
 
-        function goTo(id) { 
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
-            document.getElementById(id).classList.add('active'); 
-        }
-
-        function loadAndPlaySound() {
-            let p = document.getElementById('audioPlayer');
-            p.src = document.getElementById('soundSelect').value;
-            p.play().catch(e => alert("يرجى الضغط في أي مكان على الشاشة أولاً لتفعيل الصوت."));
-        }
-
-        function selectGrade(g) {
-            document.getElementById('gradeTitle').innerText = g;
-            let subs = ["عربي", "رياضيات", "علوم", "إنجليزي"];
-            document.getElementById('subjects').innerHTML = "";
-            subs.forEach(s => document.getElementById('subjects').innerHTML += `<button class="btn" onclick="goTo('screen4')">${s}</button>`);
-            goTo('screen3');
+        function updateDisplay() {
+            let mins = Math.floor(timeLeft / 60);
+            let secs = timeLeft % 60;
+            document.getElementById('timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
         }
 
         function startTimer() {
-            let time = document.getElementById('timerInput').value * 60;
-            let i = setInterval(() => {
-                time--;
-                document.getElementById('timeRemaining').innerText = Math.floor(time/60) + ":" + (time%60).toString().padStart(2, '0');
-                if(time <= 0) { clearInterval(i); alert("انتهى وقت المذاكرة!"); }
+            if (timerId) return;
+            timerId = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                if (timeLeft <= 0) { clearInterval(timerId); timerId = null; alert("انتهى الوقت!"); }
             }, 1000);
         }
 
-        ["خامس", "سادس", "سابع", "ثامن", "تاسع", "عاشر"].forEach(g => document.getElementById('grades').innerHTML += `<button class="btn" onclick="selectGrade('${g}')">${g}</button>`);
+        function stopTimer() { clearInterval(timerId); timerId = null; }
+
+        function resetTimer() { stopTimer(); timeLeft = document.getElementById('focusTime').value * 60; updateDisplay(); }
+
+        function addLesson() {
+            lessons++;
+            document.getElementById('lessonCount').innerText = lessons;
+            document.getElementById('myLessons').innerText = lessons;
+            if (lessons < 8) document.getElementById('alertMsg').innerText = "هذه المادة قد تحتاج الى دراسة!";
+            else document.getElementById('alertMsg').innerText = "";
+            rewards.forEach(r => { if (lessons === r.lessonsRequired) alert("مبروك! فتحت شخصية: " + r.name); });
+        }
+
+        function updateRewardsScreen() {
+            let list = document.getElementById('rewardsList');
+            list.innerHTML = "";
+            rewards.forEach(r => {
+                let div = document.createElement('div');
+                div.className = "reward-card";
+                if (lessons >= r.lessonsRequired) {
+                    div.innerHTML = `<img src="${r.image}" class="reward-img"><p>${r.name}</p>`;
+                } else {
+                    div.innerHTML = `<p>${r.name} (مقفل - ${r.lessonsRequired} درس)</p>`;
+                }
+                list.appendChild(div);
+            });
+            showScreen('rewardsScreen');
+        }
     </script>
 </body>
 </html>
