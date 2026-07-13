@@ -5,39 +5,146 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>محطة الدراسة</title>
     <style>
-        body, html { height: 100%; margin: 0; font-family: 'Arial', sans-serif; }
-        .screen { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #007bff; color: white; }
-        .hidden { display: none; }
-        button { padding: 15px 30px; font-size: 20px; cursor: pointer; border: none; border-radius: 8px; margin: 10px; background: white; color: #007bff; font-weight: bold; }
-        h1 { font-size: 3rem; }
+        body { margin: 0; font-family: 'Arial', sans-serif; background: #f4f4f9; }
+        .screen { display: none; padding: 20px; }
+        .active { display: block; }
+        .full-blue { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #007bff; color: white; }
+        .btn { background: #FFC107; color: #333; padding: 15px 25px; border-radius: 10px; border: none; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin: 10px; width: 80%; max-width: 300px; }
+        .btn-disabled { background: #cccccc; color: #666; cursor: not-allowed; }
+        .card { background: white; padding: 20px; margin: 15px 0; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .popup { position: fixed; top: 30%; left: 10%; width: 80%; background: #FFC107; padding: 20px; border-radius: 10px; text-align: center; display: none; z-index: 100; }
+        h2 { color: #007bff; border-bottom: 2px solid #FFC107; padding-bottom: 5px; }
+        nav { background: #333; color: white; padding: 10px; display: flex; justify-content: space-around; border-radius: 0 0 10px 10px; margin-bottom: 15px; font-weight: bold; }
+        [contenteditable="true"] { border: 1px dashed #ccc; padding: 5px; border-radius: 5px; display: block; min-height: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- Section 1: Welcome -->
-    <div id="screen1" class="screen">
+    <!-- S1: Landing -->
+    <div id="screen1" class="screen full-blue active">
         <h1>مرحبا بك في محطة الدراسة!</h1>
-        <button onclick="showScreen('screen2')">ابدأ</button>
+        <button class="btn" onclick="goTo('screen2')">ابدأ</button>
     </div>
 
-    <!-- Section 2: Grade Selection -->
-    <div id="screen2" class="screen hidden">
+    <!-- S2: Grade Selection -->
+    <div id="screen2" class="screen full-blue">
         <h1>صف كم؟</h1>
-        <div>
-            <button>خامس</button>
-            <button>سادس</button>
-            <button>سابع</button>
-            <button>ثامن</button>
-            <button>تاسع</button>
-            <button>عاشر</button>
+        <button class="btn" onclick="selectGrade('خامس')">خامس</button>
+        <button class="btn btn-disabled">سادس</button>
+        <button class="btn btn-disabled">سابع</button>
+        <button class="btn btn-disabled">ثامن</button>
+        <button class="btn btn-disabled">تاسع</button>
+        <button class="btn btn-disabled">عاشر</button>
+    </div>
+
+    <!-- S3: Subject Selection -->
+    <div id="screen3" class="screen">
+        <h2 style="text-align:center;">اختر المادة</h2>
+        <div id="subjectList" style="text-align:center; display:flex; flex-direction:column; align-items:center;"></div>
+        <button class="btn" style="background:#ddd;" onclick="goTo('screen2')">رجوع</button>
+    </div>
+
+    <!-- S4: Dashboard -->
+    <div id="screen4" class="screen">
+        <nav>
+            <span>الستريك: 0</span>
+            <span>المؤقت: 00:00</span>
+        </nav>
+        
+        <div class="card">
+            <h2 id="lessonTitle">هل أنت مستعد لبدء الدرس الأول؟</h2>
+            <button id="mainBtn" class="btn" onclick="nextStep()" style="width:100%;">نعم</button>
+        </div>
+
+        <div class="card">
+            <h2>أهدافي وتحدياتي</h2>
+            <p><strong>هدفي:</strong> <span contenteditable="true">اكتب هدفك...</span></p>
+            <p><strong>تحدي يومي:</strong> <span contenteditable="true">أنهِ درسين اليوم.</span></p>
+            <p><strong>تحدي شهري:</strong> <span contenteditable="true">راجع الوحدة الثانية.</span></p>
+            <p><strong>تحدي فصلي:</strong> <span contenteditable="true">تحقيق الدرجة النهائية.</span></p>
+        </div>
+
+        <button class="btn" style="background:#dc3545; color:white; width:100%;" onclick="finishBook()">انهيت الكتاب!</button>
+        
+        <div class="card">
+            <h2>التقدم</h2>
+            <div id="progressList"></div>
         </div>
     </div>
 
+    <!-- Popups -->
+    <div id="popup" class="popup">
+        <p>أحسنت! واصل التقدم.</p>
+        <button class="btn" onclick="closePopup()">شكراً</button>
+    </div>
+
+    <div id="screenFinal" class="screen full-blue" style="text-align:center;">
+        <h1>مبارك لك! 🎉</h1>
+        <p style="font-size: 1.3rem;">أنت بطل حقيقي! لقد أنهيت الكتاب بالكامل بجهدك وعزيمتك. هذا الإنجاز دليل على تميزك، ونحن فخورون جداً بك.</p>
+        <button class="btn" onclick="goTo('screen3')">رجوع</button>
+    </div>
+
     <script>
-        function showScreen(screenId) {
-            document.getElementById('screen1').classList.add('hidden');
-            document.getElementById('screen2').classList.remove('hidden');
+        let selectedSubject = "";
+        let progressData = JSON.parse(localStorage.getItem('studyProgress')) || 
+                           { "رياضيات": 0, "عربي": 0, "إسلامية": 0, "علوم": 0, "إنجليزي": 0, "دراسات": 0, "فيزياء": 0, "كيمياء": 0, "أحياء": 0 };
+
+        function goTo(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            localStorage.setItem('currentScreen', id);
+            if(id === 'screen4') updateProgress();
         }
+
+        function selectGrade(grade) {
+            const list = document.getElementById('subjectList');
+            list.innerHTML = "";
+            let subjects = ["عربي", "إسلامية", "رياضيات", "علوم", "إنجليزي", "دراسات"];
+            if (grade === "تاسع" || grade === "عاشر") subjects = ["عربي", "إسلامية", "رياضيات", "فيزياء", "كيمياء", "أحياء", "إنجليزي", "دراسات"];
+            subjects.forEach(sub => { list.innerHTML += `<button class="btn" onclick="startSubject('${sub}')">${sub}</button>`; });
+            goTo('screen3');
+        }
+
+        function startSubject(sub) {
+            selectedSubject = sub;
+            goTo('screen4');
+        }
+
+        function nextStep() {
+            const btn = document.getElementById('mainBtn');
+            const title = document.getElementById('lessonTitle');
+            if (btn.innerText === "نعم") {
+                title.innerText = `رائع! عندما تنتهي من ${selectedSubject}، اضغط الزر.`;
+                btn.innerText = "انهيت الدرس";
+            } else {
+                progressData[selectedSubject]++;
+                localStorage.setItem('studyProgress', JSON.stringify(progressData));
+                document.getElementById('popup').style.display = 'block';
+                title.innerText = `هل أنت مستعد لبدء الدرس القادم؟`;
+                btn.innerText = "نعم";
+                updateProgress();
+            }
+        }
+
+        function closePopup() { document.getElementById('popup').style.display = 'none'; }
+        function finishBook() { goTo('screenFinal'); }
+
+        function updateProgress() {
+            const container = document.getElementById('progressList');
+            container.innerHTML = "";
+            for (let sub in progressData) {
+                if(progressData[sub] >= 0) {
+                    let warning = progressData[sub] < 1 ? "<br><small style='color:red;'>ملاحظة: هذه المادة تحتاج إلى المزيد من الدراسة!</small>" : "";
+                    container.innerHTML += `<p><strong>${sub}:</strong> ${progressData[sub]} دروس منجزة ${warning}</p>`;
+                }
+            }
+        }
+
+        window.onload = () => {
+            const savedScreen = localStorage.getItem('currentScreen') || 'screen1';
+            goTo(savedScreen);
+            updateProgress();
+        };
     </script>
 </body>
 </html>
