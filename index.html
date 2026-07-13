@@ -6,26 +6,14 @@
     <title>محطة الدراسة</title>
     <style>
         body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #007bff; font-family: sans-serif; }
-        
-        /* Transition style for soft effect */
-        .container { 
-            text-align: center; 
-            width: 90%; 
-            display: none; 
-            opacity: 0; 
-            transition: opacity 0.5s ease;
-        }
-        .active { 
-            display: block; 
-            opacity: 1; 
-        }
-        
+        .container { text-align: center; width: 90%; display: none; opacity: 0; transition: opacity 0.5s ease; }
+        .active { display: block; opacity: 1; }
         h1 { color: white; }
         .btn { background-color: yellow; color: black; border: none; padding: 10px 20px; font-size: 1rem; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; width: 80%; max-width: 300px; display: block; margin-left: auto; margin-right: auto; }
         .back-btn { background-color: #ffcccc; margin-top: 20px; }
-        .timer-display { color: white; font-size: 3rem; margin: 20px; }
-        input { width: 60px; padding: 5px; font-size: 1rem; text-align: center; }
-        table { width: 100%; border-collapse: collapse; color: white; margin-top: 20px; }
+        .timer-display { color: white; font-size: 3rem; margin: 10px; }
+        input { width: 60px; padding: 8px; font-size: 1rem; text-align: center; border-radius: 5px; border: none; }
+        table { width: 100%; border-collapse: collapse; color: white; margin-top: 20px; font-size: 0.9rem; }
         th, td { border: 1px solid white; padding: 8px; }
         .reward-card { margin: 10px; padding: 10px; border: 2px solid white; border-radius: 10px; display: inline-block; }
         .reward-img { width: 100px; height: 100px; object-fit: cover; }
@@ -46,18 +34,26 @@
     </div>
 
     <div id="subjects-screen" class="container">
-        <h1 id="sub-title">اختر المادة</h1>
+        <h1>اختر المادة</h1>
         <div id="sub-list"></div>
         <button class="btn back-btn" onclick="showScreen('screen2')">رجوع</button>
     </div>
 
     <div id="dashboard" class="container">
         <h1 id="currentSubjectTitle"></h1>
-        <label style="color: white;">دروس المعلم:</label>
-        <input type="number" id="teacherLessons" onchange="updateTeacherLessons()">
+        <div style="color: white; margin-bottom: 10px;">دروس المعلم: 
+            <input type="number" id="teacherLessonsInput" onchange="saveTeacherLessons()">
+        </div>
+        
+        <div style="color: white;">ضبط الوقت (دقائق): 
+            <input type="number" id="timerInput" value="25" onchange="resetTimer()">
+        </div>
+        
         <div class="timer-display" id="timer">25:00</div>
+        
         <button class="btn" onclick="startTimer()">ابدأ</button>
         <button class="btn" onclick="stopTimer()">إيقاف</button>
+        <button class="btn" onclick="resetTimer()">إعادة تعيين</button>
         <br>
         <button class="btn" onclick="addLesson()">1 درس تم الانتهاء منه</button>
         <button class="btn" onclick="updateProgressTable(); showScreen('progress');">التقدم</button>
@@ -67,9 +63,7 @@
 
     <div id="progress" class="container">
         <h1>مستوى التقدم</h1>
-        <table id="progressTable">
-            <tr><th>المادة</th><th>دروسك</th><th>دروس المعلم</th><th>ملاحظة</th></tr>
-        </table>
+        <table id="progressTable"></table>
         <button class="btn back-btn" onclick="showScreen('dashboard')">رجوع</button>
     </div>
 
@@ -100,65 +94,64 @@
         ];
 
         function showScreen(id) {
-            document.querySelectorAll('.container').forEach(d => {
-                d.classList.remove('active');
-                d.style.display = 'none';
-            });
+            document.querySelectorAll('.container').forEach(d => { d.classList.remove('active'); d.style.display = 'none'; });
             let target = document.getElementById(id);
             target.style.display = 'block';
             setTimeout(() => target.classList.add('active'), 50);
         }
 
         function setGrade(grade) {
-            let list = document.getElementById('sub-list');
-            list.innerHTML = "";
+            let list = document.getElementById('sub-list'); list.innerHTML = "";
             let subs = (grade === '5-8') ? ["رياضيات", "إسلامية", "عربي", "دراسات", "علوم", "إنجليزي"] : ["رياضيات", "إسلامية", "عربي", "دراسات", "فيزياء", "كيمياء", "أحياء", "إنجليزي"];
             subs.forEach(s => {
-                let b = document.createElement('button');
-                b.className = "btn"; b.innerText = s;
-                b.onclick = () => { 
-                    currentSubject = s; 
-                    document.getElementById('currentSubjectTitle').innerText = s; 
-                    document.getElementById('teacherLessons').value = data[s].teacher;
-                    showScreen('dashboard'); 
-                };
+                let b = document.createElement('button'); b.className = "btn"; b.innerText = s;
+                b.onclick = () => { currentSubject = s; document.getElementById('currentSubjectTitle').innerText = s; document.getElementById('teacherLessonsInput').value = data[s].teacher; showScreen('dashboard'); };
                 list.appendChild(b);
             });
             showScreen('subjects-screen');
         }
 
-        function addLesson() {
-            data[currentSubject].mine++;
-            globalLessons++;
-            rewards.forEach(r => { if (globalLessons === r.lessonsRequired) alert("مبروك! فتحت: " + r.name); });
+        function saveTeacherLessons() { data[currentSubject].teacher = document.getElementById('teacherLessonsInput').value; }
+        
+        function addLesson() { data[currentSubject].mine++; globalLessons++; rewards.forEach(r => { if (globalLessons === r.lessonsRequired) alert("مبروك! فتحت: " + r.name); }); }
+
+        function startTimer() { 
+            if(timerId) return;
+            timerId = setInterval(() => { 
+                timeLeft--; 
+                let m = Math.floor(timeLeft/60); 
+                let s = (timeLeft%60).toString().padStart(2, '0');
+                document.getElementById('timer').innerText = m + ":" + s; 
+                if(timeLeft <= 0) { clearInterval(timerId); timerId = null; alert("انتهى الوقت!"); }
+            }, 1000); 
         }
 
-        function updateTeacherLessons() { data[currentSubject].teacher = document.getElementById('teacherLessons').value; }
+        function stopTimer() { clearInterval(timerId); timerId = null; }
+        
+        function resetTimer() { 
+            stopTimer(); 
+            timeLeft = document.getElementById('timerInput').value * 60; 
+            let m = Math.floor(timeLeft/60);
+            document.getElementById('timer').innerText = m + ":00";
+        }
 
         function updateProgressTable() {
             let table = document.getElementById('progressTable');
             table.innerHTML = "<tr><th>المادة</th><th>دروسك</th><th>دروس المعلم</th><th>ملاحظة</th></tr>";
             for (let sub in data) {
-                if (data[sub].mine > 0 || data[sub].teacher > 0) {
-                    let note = (data[sub].mine < data[sub].teacher) ? "هذه المادة قد تحتاج الى دراسة!" : "";
-                    table.innerHTML += `<tr><td>${sub}</td><td>${data[sub].mine}</td><td>${data[sub].teacher}</td><td>${note}</td></tr>`;
-                }
+                let note = (data[sub].mine < data[sub].teacher) ? "يحتاج دراسة" : "ممتاز";
+                table.innerHTML += `<tr><td>${sub}</td><td>${data[sub].mine}</td><td>${data[sub].teacher}</td><td>${note}</td></tr>`;
             }
         }
 
         function updateRewardsScreen() {
-            let list = document.getElementById('rewardsList');
-            list.innerHTML = "";
+            let list = document.getElementById('rewardsList'); list.innerHTML = "";
             rewards.forEach(r => {
-                let div = document.createElement('div');
-                div.className = "reward-card";
+                let div = document.createElement('div'); div.className = "reward-card";
                 div.innerHTML = (globalLessons >= r.lessonsRequired) ? `<img src="${r.image}" class="reward-img"><p>${r.name}</p>` : `<p>${r.name} (${r.lessonsRequired})</p>`;
                 list.appendChild(div);
             });
         }
-
-        function startTimer() { if(!timerId) timerId = setInterval(() => { timeLeft--; document.getElementById('timer').innerText = Math.floor(timeLeft/60) + ":" + (timeLeft%60).toString().padStart(2, '0'); }, 1000); }
-        function stopTimer() { clearInterval(timerId); timerId = null; }
     </script>
 </body>
 </html>
