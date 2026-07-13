@@ -3,25 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Student Path Oman</title>
+    <title>StudentPath | Oman</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f0f2f5; color: #333; }
+        header { background: linear-gradient(135deg, #007bff, #0056b3); color: white; padding: 2rem; text-align: center; }
+        nav { display: flex; justify-content: center; background: #333; padding: 10px; }
+        nav a { color: white; margin: 0 15px; text-decoration: none; font-weight: bold; }
+        .container { padding: 20px; max-width: 900px; margin: auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+    </style>
 </head>
 <body>
     <header>
-        <h1>Student Path Oman</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="#">Grade 5-8</a></li>
-                <li><a href="#">Grade 9-12</a></li>
-                <li><a href="#">Study Tools</a></li>
-            </ul>
-        </nav>
+        <h1>Welcome to StudentPath</h1>
+        <p>Your journey to academic excellence starts here.</p>
     </header>
-
-    <main>
-        <h2>Welcome to Your Study Hub</h2>
-        <p>Your journey to academic success starts here. Select a grade level to get started.</p>
-    </main>
+    <nav>
+        <a href="#">Home</a>
+        <a href="#">Resources</a>
+        <a href="#">Contact</a>
+    </nav>
+    <div class="container">
+        <h2>Subjects</h2>
+        <div class="grid">
+            <div class="card"><h3>Mathematics</h3><p>Practice exams & notes</p></div>
+            <div class="card"><h3>Physics</h3><p>Concepts & formulas</p></div>
+            <div class="card"><h3>Chemistry</h3><p>Periodic table & labs</p></div>
+        </div>
+    </div>
 </body>
 </html>
