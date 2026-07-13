@@ -21,80 +21,45 @@
 </head>
 <body>
 
-    <!-- 1: Home -->
     <div id="screen1" class="container active">
         <h1>مرحباً بك في محطة الدراسة!</h1>
         <button class="btn" onclick="showScreen('screen2')">ابدأ</button>
     </div>
 
-    <!-- 2: Grade Selection -->
     <div id="screen2" class="container">
         <h1>صف كم؟</h1>
-        <button class="btn" onclick="showScreen('subjects5-8')">خامس الى ثامن</button>
-        <button class="btn" onclick="showScreen('subjects9-10')">تاسع وعاشر</button>
+        <button class="btn" onclick="setGrade('5-8')">خامس الى ثامن</button>
+        <button class="btn" onclick="setGrade('9-10')">تاسع وعاشر</button>
         <button class="btn back-btn" onclick="showScreen('screen1')">رجوع</button>
     </div>
 
-    <!-- 3: Subjects 5-8 -->
-    <div id="subjects5-8" class="container">
-        <h1>اختر المادة (خامس-ثامن)</h1>
-        <button class="btn" onclick="showScreen('dashboard')">رياضيات</button>
-        <button class="btn" onclick="showScreen('dashboard')">إسلامية</button>
-        <button class="btn" onclick="showScreen('dashboard')">عربي</button>
-        <button class="btn" onclick="showScreen('dashboard')">دراسات</button>
-        <button class="btn" onclick="showScreen('dashboard')">علوم</button>
-        <button class="btn" onclick="showScreen('dashboard')">إنجليزي</button>
+    <div id="subjects-screen" class="container">
+        <h1 id="sub-title">اختر المادة</h1>
+        <div id="sub-list"></div>
         <button class="btn back-btn" onclick="showScreen('screen2')">رجوع</button>
     </div>
 
-    <!-- 4: Subjects 9-10 -->
-    <div id="subjects9-10" class="container">
-        <h1>اختر المادة (تاسع-عاشر)</h1>
-        <button class="btn" onclick="showScreen('dashboard')">رياضيات</button>
-        <button class="btn" onclick="showScreen('dashboard')">إسلامية</button>
-        <button class="btn" onclick="showScreen('dashboard')">عربي</button>
-        <button class="btn" onclick="showScreen('dashboard')">دراسات</button>
-        <button class="btn" onclick="showScreen('dashboard')">فيزياء</button>
-        <button class="btn" onclick="showScreen('dashboard')">كيمياء</button>
-        <button class="btn" onclick="showScreen('dashboard')">أحياء</button>
-        <button class="btn" onclick="showScreen('dashboard')">إنجليزي</button>
-        <button class="btn back-btn" onclick="showScreen('screen2')">رجوع</button>
-    </div>
-
-    <!-- Dashboard -->
     <div id="dashboard" class="container">
-        <h1>لوحة تحكم المادة</h1>
-        <div>
-            <label style="color: white;">وقت التركيز:</label>
-            <input type="number" id="focusTime" value="25">
-            <label style="color: white;">وقت الاستراحة:</label>
-            <input type="number" id="breakTime" value="5">
-        </div>
+        <h1 id="currentSubjectTitle"></h1>
+        <input type="number" id="teacherLessons" placeholder="دروس المعلم" onchange="updateTeacherLessons()">
         <div class="timer-display" id="timer">25:00</div>
         <button class="btn" onclick="startTimer()">ابدأ</button>
         <button class="btn" onclick="stopTimer()">إيقاف</button>
-        <button class="btn" onclick="resetTimer()">إعادة تعيين</button>
         <br>
         <button class="btn" onclick="addLesson()">1 درس تم الانتهاء منه</button>
-        <div style="color: white; font-size: 1.2rem;">إجمالي الدروس المنجزة: <span id="lessonCount">0</span></div>
-        <br>
-        <button class="btn" onclick="showScreen('progress')">التقدم</button>
-        <button class="btn" onclick="updateRewardsScreen()">الجوائز</button>
-        <button class="btn back-btn" onclick="showScreen('screen2')">رجوع</button>
+        <button class="btn" onclick="updateProgressTable(); showScreen('progress');">التقدم</button>
+        <button class="btn" onclick="updateRewardsScreen(); showScreen('rewardsScreen');">الجوائز</button>
+        <button class="btn back-btn" onclick="showScreen('subjects-screen')">رجوع</button>
     </div>
 
-    <!-- Progress Screen -->
     <div id="progress" class="container">
         <h1>مستوى التقدم</h1>
-        <table>
-            <tr><th>المادة</th><th>دروسك</th><th>دروس المعلم</th></tr>
-            <tr><td>المادة المختارة</td><td id="myLessons">0</td><td>8</td></tr>
+        <table id="progressTable">
+            <tr><th>المادة</th><th>دروسك</th><th>دروس المعلم</th><th>ملاحظة</th></tr>
         </table>
-        <p id="alertMsg" style="color: yellow; font-weight: bold;"></p>
         <button class="btn back-btn" onclick="showScreen('dashboard')">رجوع</button>
     </div>
 
-    <!-- Rewards Screen -->
     <div id="rewardsScreen" class="container">
         <h1>الجوائز</h1>
         <div id="rewardsList"></div>
@@ -102,9 +67,18 @@
     </div>
 
     <script>
-        let timeLeft = 25 * 60;
+        let currentSubject = "";
+        let globalLessons = 0;
         let timerId = null;
-        let lessons = 0;
+        let timeLeft = 25 * 60;
+        
+        let data = {
+            "رياضيات": { mine: 0, teacher: 0 }, "إسلامية": { mine: 0, teacher: 0 },
+            "عربي": { mine: 0, teacher: 0 }, "دراسات": { mine: 0, teacher: 0 },
+            "علوم": { mine: 0, teacher: 0 }, "إنجليزي": { mine: 0, teacher: 0 },
+            "فيزياء": { mine: 0, teacher: 0 }, "كيمياء": { mine: 0, teacher: 0 }, "أحياء": { mine: 0, teacher: 0 }
+        };
+
         const rewards = [
             { name: "triple T", lessonsRequired: 10, image: "https://i.pinimg.com/736x/f1/3b/d2/f13bd27b74291818995a189fcced5693.jpg" },
             { name: "cat", lessonsRequired: 20, image: "https://i.pinimg.com/736x/b2/82/66/b28266e613ba53221b1ca4c8c5cbac04.jpg" },
@@ -112,37 +86,41 @@
             { name: "timebomb", lessonsRequired: 100, image: "https://i.pinimg.com/736x/45/ad/8f/45ad8fdefdc24c2ca7221398c63a0e4c.jpg" }
         ];
 
-        function showScreen(screenId) {
-            document.querySelectorAll('.container').forEach(div => div.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
+        function showScreen(id) {
+            document.querySelectorAll('.container').forEach(d => d.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
 
-        function updateDisplay() {
-            let mins = Math.floor(timeLeft / 60);
-            let secs = timeLeft % 60;
-            document.getElementById('timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        function setGrade(grade) {
+            let list = document.getElementById('sub-list');
+            list.innerHTML = "";
+            let subs = (grade === '5-8') ? ["رياضيات", "إسلامية", "عربي", "دراسات", "علوم", "إنجليزي"] : ["رياضيات", "إسلامية", "عربي", "دراسات", "فيزياء", "كيمياء", "أحياء", "إنجليزي"];
+            subs.forEach(s => {
+                let b = document.createElement('button');
+                b.className = "btn"; b.innerText = s;
+                b.onclick = () => { currentSubject = s; document.getElementById('currentSubjectTitle').innerText = s; showScreen('dashboard'); };
+                list.appendChild(b);
+            });
+            showScreen('subjects-screen');
         }
-
-        function startTimer() {
-            if (timerId) return;
-            timerId = setInterval(() => {
-                timeLeft--;
-                updateDisplay();
-                if (timeLeft <= 0) { clearInterval(timerId); timerId = null; alert("انتهى الوقت!"); }
-            }, 1000);
-        }
-
-        function stopTimer() { clearInterval(timerId); timerId = null; }
-
-        function resetTimer() { stopTimer(); timeLeft = document.getElementById('focusTime').value * 60; updateDisplay(); }
 
         function addLesson() {
-            lessons++;
-            document.getElementById('lessonCount').innerText = lessons;
-            document.getElementById('myLessons').innerText = lessons;
-            if (lessons < 8) document.getElementById('alertMsg').innerText = "هذه المادة قد تحتاج الى دراسة!";
-            else document.getElementById('alertMsg').innerText = "";
-            rewards.forEach(r => { if (lessons === r.lessonsRequired) alert("مبروك! فتحت شخصية: " + r.name); });
+            data[currentSubject].mine++;
+            globalLessons++;
+            rewards.forEach(r => { if (globalLessons === r.lessonsRequired) alert("مبروك! فتحت: " + r.name); });
+        }
+
+        function updateTeacherLessons() { data[currentSubject].teacher = document.getElementById('teacherLessons').value; }
+
+        function updateProgressTable() {
+            let table = document.getElementById('progressTable');
+            table.innerHTML = "<tr><th>المادة</th><th>دروسك</th><th>دروس المعلم</th><th>ملاحظة</th></tr>";
+            for (let sub in data) {
+                if (data[sub].mine > 0 || data[sub].teacher > 0) {
+                    let note = (data[sub].mine < data[sub].teacher) ? "هذه المادة قد تحتاج الى دراسة!" : "";
+                    table.innerHTML += `<tr><td>${sub}</td><td>${data[sub].mine}</td><td>${data[sub].teacher}</td><td>${note}</td></tr>`;
+                }
+            }
         }
 
         function updateRewardsScreen() {
@@ -151,15 +129,13 @@
             rewards.forEach(r => {
                 let div = document.createElement('div');
                 div.className = "reward-card";
-                if (lessons >= r.lessonsRequired) {
-                    div.innerHTML = `<img src="${r.image}" class="reward-img"><p>${r.name}</p>`;
-                } else {
-                    div.innerHTML = `<p>${r.name} (مقفل - ${r.lessonsRequired} درس)</p>`;
-                }
+                div.innerHTML = (globalLessons >= r.lessonsRequired) ? `<img src="${r.image}" class="reward-img"><p>${r.name}</p>` : `<p>${r.name} (${r.lessonsRequired})</p>`;
                 list.appendChild(div);
             });
-            showScreen('rewardsScreen');
         }
+
+        function startTimer() { if(!timerId) timerId = setInterval(() => { timeLeft--; document.getElementById('timer').innerText = Math.floor(timeLeft/60) + ":" + (timeLeft%60); }, 1000); }
+        function stopTimer() { clearInterval(timerId); timerId = null; }
     </script>
 </body>
 </html>
