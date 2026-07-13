@@ -1,36 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudentPath | Oman</title>
+    <title>محطة الدراسة</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f0f2f5; color: #333; }
-        header { background: linear-gradient(135deg, #007bff, #0056b3); color: white; padding: 2rem; text-align: center; }
-        nav { display: flex; justify-content: center; background: #333; padding: 10px; }
-        nav a { color: white; margin: 0 15px; text-decoration: none; font-weight: bold; }
-        .container { padding: 20px; max-width: 900px; margin: auto; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+        body, html { height: 100%; margin: 0; font-family: 'Arial', sans-serif; }
+        .screen { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #007bff; color: white; }
+        .hidden { display: none; }
+        button { padding: 15px 30px; font-size: 20px; cursor: pointer; border: none; border-radius: 8px; margin: 10px; background: white; color: #007bff; font-weight: bold; }
+        h1 { font-size: 3rem; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to StudentPath</h1>
-        <p>Your journey to academic excellence starts here.</p>
-    </header>
-    <nav>
-        <a href="#">Home</a>
-        <a href="#">Resources</a>
-        <a href="#">Contact</a>
-    </nav>
-    <div class="container">
-        <h2>Subjects</h2>
-        <div class="grid">
-            <div class="card"><h3>Mathematics</h3><p>Practice exams & notes</p></div>
-            <div class="card"><h3>Physics</h3><p>Concepts & formulas</p></div>
-            <div class="card"><h3>Chemistry</h3><p>Periodic table & labs</p></div>
+
+    <!-- Section 1: Welcome -->
+    <div id="screen1" class="screen">
+        <h1>مرحبا بك في محطة الدراسة!</h1>
+        <button onclick="showScreen('screen2')">ابدأ</button>
+    </div>
+
+    <!-- Section 2: Grade Selection -->
+    <div id="screen2" class="screen hidden">
+        <h1>صف كم؟</h1>
+        <div>
+            <button>خامس</button>
+            <button>سادس</button>
+            <button>سابع</button>
+            <button>ثامن</button>
+            <button>تاسع</button>
+            <button>عاشر</button>
         </div>
     </div>
+
+    <script>
+        function showScreen(screenId) {
+            document.getElementById('screen1').classList.add('hidden');
+            document.getElementById('screen2').classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>
