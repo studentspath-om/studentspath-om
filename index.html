@@ -10,14 +10,14 @@
         .screen { display: none; opacity: 0; transition: opacity 0.6s ease-in-out; padding: 20px; width: 100%; flex-direction: column; align-items: center; box-sizing: border-box; }
         .active { display: flex; opacity: 1; }
         
-        .btn { background: white; border: 2px solid var(--accent); padding: 20px 30px; border-radius: 20px; font-weight: bold; font-size: 1.2rem; cursor: pointer; margin: 10px; width: 85%; max-width: 400px; box-shadow: 4px 4px 0px var(--accent); transition: 0.3s; }
+        .btn { background: white; border: 2px solid var(--accent); padding: 15px 30px; border-radius: 20px; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin: 10px; width: 80%; max-width: 350px; box-shadow: 4px 4px 0px var(--accent); transition: 0.3s; }
         .btn:hover { background: var(--accent); color: white; }
         
-        .card { background: var(--paper-bg); padding: 25px; margin: 15px; border-radius: 30px; width: 90%; max-width: 500px; box-shadow: 8px 8px 15px rgba(0,0,0,0.1); border: 1px solid #eee; text-align: center; }
+        .card { background: var(--paper-bg); padding: 20px; margin: 10px; border-radius: 30px; width: 90%; max-width: 500px; box-shadow: 8px 8px 15px rgba(0,0,0,0.1); border: 1px solid #eee; text-align: center; }
         
-        h1, h2 { font-size: 1.8rem; color: #333; }
+        h1, h2 { font-size: 1.6rem; color: #333; }
         input { padding: 10px; border-radius: 15px; border: 2px solid var(--soft-blue); width: 80px; text-align: center; font-size: 1.2rem; margin: 10px; }
-        nav { background: rgba(255,255,255,0.8); padding: 15px; width: 90%; display: flex; justify-content: space-around; border-radius: 20px; margin-bottom: 20px; font-weight: bold; }
+        nav { background: rgba(255,255,255,0.8); padding: 10px; width: 90%; display: flex; justify-content: space-around; border-radius: 20px; margin-bottom: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -32,14 +32,14 @@
     <div id="screen2" class="screen">
         <h1>اختر صفك الدراسي</h1>
         <div id="grades" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
-        <button class="btn" style="background:#eee;" onclick="goTo('screen1')">رجوع</button>
+        <button class="btn" onclick="goTo('screen1')">رجوع</button>
     </div>
 
     <!-- Screen 3: Subjects -->
     <div id="screen3" class="screen">
         <h2 id="gradeTitle"></h2>
         <div id="subjects" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
-        <button class="btn" style="background:#eee;" onclick="goTo('screen2')">رجوع</button>
+        <button class="btn" onclick="goTo('screen2')">رجوع</button>
     </div>
 
     <!-- Screen 4: Dashboard -->
@@ -53,11 +53,7 @@
             <h2 id="dashTitle"></h2>
             <button class="btn" style="background:var(--accent);" onclick="goTo('screenTimer')">ابدأ الدرس</button>
         </div>
-        <div style="display:flex; width:90%; gap:10px;">
-            <div class="card"><h3>الأهداف</h3><div contenteditable="true" id="goals">...</div></div>
-            <div class="card"><h3>التحديات</h3><div contenteditable="true" id="challenges">...</div></div>
-        </div>
-        <button class="btn" style="background:#eee;" onclick="goTo('screen3')">رجوع</button>
+        <button class="btn" onclick="goTo('screen3')">رجوع</button>
     </div>
 
     <!-- Screen 5: Timer -->
@@ -70,7 +66,9 @@
                 <button class="btn" onclick="stopTimer()">إيقاف</button>
             </div>
             <h2 id="timeRemaining">00:00</h2>
-            <button class="btn" onclick="document.getElementById('audioPlayer').play()">تفعيل الصوت</button>
+            
+            <!-- Audio Controls -->
+            <button class="btn" onclick="document.getElementById('audioPlayer').play()">تفعيل الصوت (اضغط هنا أولاً)</button>
             <select id="soundSelect" onchange="loadSound()" class="btn">
                 <option value="">اختر صوتاً...</option>
                 <option value="https://actions.google.com/sounds/v1/weather/rain_heavy_wind.ogg">مطر</option>
@@ -78,7 +76,8 @@
                 <option value="https://actions.google.com/sounds/v1/nature/ocean_waves.ogg">شاطئ</option>
                 <option value="https://actions.google.com/sounds/v1/nature/birds_in_forest.ogg">صباح</option>
             </select>
-            <button class="btn" style="background:#eee;" onclick="goTo('screen4')">رجوع</button>
+            
+            <button class="btn" onclick="goTo('screen4')">رجوع</button>
         </div>
     </div>
 
