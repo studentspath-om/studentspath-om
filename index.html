@@ -9,7 +9,7 @@
         .container { text-align: center; width: 90%; display: none; }
         .active { display: block; }
         h1 { color: white; }
-        .btn { background-color: yellow; color: black; border: none; padding: 10px 20px; font-size: 1rem; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; }
+        .btn { background-color: yellow; color: black; border: none; padding: 10px 20px; font-size: 1rem; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; width: 80%; max-width: 300px; display: block; margin-left: auto; margin-right: auto; }
         .back-btn { background-color: #ffcccc; margin-top: 20px; }
         .timer-display { color: white; font-size: 3rem; margin: 20px; }
         input { width: 60px; padding: 5px; font-size: 1rem; text-align: center; }
@@ -21,18 +21,44 @@
 </head>
 <body>
 
-    <!-- Screen 1: Home -->
+    <!-- 1: Home -->
     <div id="screen1" class="container active">
         <h1>مرحباً بك في محطة الدراسة!</h1>
         <button class="btn" onclick="showScreen('screen2')">ابدأ</button>
     </div>
 
-    <!-- Screen 2: Select Grade -->
+    <!-- 2: Grade Selection -->
     <div id="screen2" class="container">
         <h1>صف كم؟</h1>
-        <button class="btn" onclick="showScreen('dashboard')">خامس الى ثامن</button>
-        <button class="btn" onclick="showScreen('dashboard')">تاسع وعاشر</button>
+        <button class="btn" onclick="showScreen('subjects5-8')">خامس الى ثامن</button>
+        <button class="btn" onclick="showScreen('subjects9-10')">تاسع وعاشر</button>
         <button class="btn back-btn" onclick="showScreen('screen1')">رجوع</button>
+    </div>
+
+    <!-- 3: Subjects 5-8 -->
+    <div id="subjects5-8" class="container">
+        <h1>اختر المادة (خامس-ثامن)</h1>
+        <button class="btn" onclick="showScreen('dashboard')">رياضيات</button>
+        <button class="btn" onclick="showScreen('dashboard')">إسلامية</button>
+        <button class="btn" onclick="showScreen('dashboard')">عربي</button>
+        <button class="btn" onclick="showScreen('dashboard')">دراسات</button>
+        <button class="btn" onclick="showScreen('dashboard')">علوم</button>
+        <button class="btn" onclick="showScreen('dashboard')">إنجليزي</button>
+        <button class="btn back-btn" onclick="showScreen('screen2')">رجوع</button>
+    </div>
+
+    <!-- 4: Subjects 9-10 -->
+    <div id="subjects9-10" class="container">
+        <h1>اختر المادة (تاسع-عاشر)</h1>
+        <button class="btn" onclick="showScreen('dashboard')">رياضيات</button>
+        <button class="btn" onclick="showScreen('dashboard')">إسلامية</button>
+        <button class="btn" onclick="showScreen('dashboard')">عربي</button>
+        <button class="btn" onclick="showScreen('dashboard')">دراسات</button>
+        <button class="btn" onclick="showScreen('dashboard')">فيزياء</button>
+        <button class="btn" onclick="showScreen('dashboard')">كيمياء</button>
+        <button class="btn" onclick="showScreen('dashboard')">أحياء</button>
+        <button class="btn" onclick="showScreen('dashboard')">إنجليزي</button>
+        <button class="btn back-btn" onclick="showScreen('screen2')">رجوع</button>
     </div>
 
     <!-- Dashboard -->
@@ -48,13 +74,12 @@
         <button class="btn" onclick="startTimer()">ابدأ</button>
         <button class="btn" onclick="stopTimer()">إيقاف</button>
         <button class="btn" onclick="resetTimer()">إعادة تعيين</button>
-        <br><br>
+        <br>
         <button class="btn" onclick="addLesson()">1 درس تم الانتهاء منه</button>
         <div style="color: white; font-size: 1.2rem;">إجمالي الدروس المنجزة: <span id="lessonCount">0</span></div>
         <br>
         <button class="btn" onclick="showScreen('progress')">التقدم</button>
         <button class="btn" onclick="updateRewardsScreen()">الجوائز</button>
-        <br>
         <button class="btn back-btn" onclick="showScreen('screen2')">رجوع</button>
     </div>
 
