@@ -2,120 +2,124 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>محطة الدراسة</title>
     <style>
-        body { margin: 0; font-family: 'Arial', sans-serif; background: #f4f4f9; }
-        .screen { display: none; padding: 20px; height: 100vh; box-sizing: border-box; }
-        .active { display: flex !important; flex-direction: column; align-items: center; justify-content: center; }
-        .full-blue { background: #007bff; color: white; width: 100%; text-align: center; }
-        .btn { background: #FFC107; color: #333; padding: 15px 25px; border-radius: 10px; border: none; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin: 10px; width: 80%; max-width: 300px; }
-        .btn-disabled { background: #cccccc; color: #666; cursor: not-allowed; }
-        .card { background: white; padding: 20px; margin: 15px 0; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 90%; max-width: 400px; }
-        .popup { position: fixed; top: 30%; left: 10%; width: 80%; background: #FFC107; padding: 20px; border-radius: 10px; text-align: center; display: none; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        h2 { color: #007bff; border-bottom: 2px solid #FFC107; padding-bottom: 5px; }
-        nav { background: #333; color: white; padding: 10px; display: flex; justify-content: space-around; width: 100%; border-radius: 0 0 10px 10px; margin-bottom: 15px; font-weight: bold; }
-        [contenteditable="true"] { border: 1px dashed #ccc; padding: 5px; border-radius: 5px; display: block; min-height: 20px; }
+        :root { --soft-blue: #a8d8ea; --paper-bg: #fffcf2; --accent: #ffb7b2; }
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--soft-blue); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+        
+        .sticker { position: fixed; width: 120px; z-index: -1; opacity: 0.8; }
+        
+        .screen { display: none; padding: 20px; width: 100%; flex-direction: column; align-items: center; }
+        .active { display: flex; }
+        
+        .btn { background: white; border: 2px solid var(--accent); padding: 12px 25px; border-radius: 20px; font-weight: bold; cursor: pointer; margin: 8px; width: 80%; max-width: 300px; transition: 0.3s; box-shadow: 3px 3px 0px var(--accent); }
+        .btn:hover { background: var(--accent); color: white; }
+        
+        .card { background: var(--paper-bg); padding: 20px; margin: 10px; border-radius: 30px; width: 85%; max-width: 400px; box-shadow: 5px 5px 15px rgba(0,0,0,0.1); border: 1px solid #eee; text-align: center; }
+        
+        input { padding: 10px; border-radius: 15px; border: 2px solid var(--soft-blue); width: 60px; text-align: center; font-size: 1.2rem; }
+        
+        nav { background: rgba(255,255,255,0.7); padding: 10px 20px; width: 80%; display: flex; justify-content: space-between; border-radius: 20px; margin-bottom: 20px; backdrop-filter: blur(5px); cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- S1: Landing -->
-    <div id="screen1" class="screen full-blue active">
-        <h1>مرحبا بك في محطة الدراسة!</h1>
-        <button class="btn" onclick="goTo('screen2')">ابدأ</button>
+    <div id="screen1" class="screen active">
+        <h1>مرحباً بك في مساحتك</h1>
+        <button class="btn" onclick="goTo('screen2')">ابدأ الرحلة</button>
     </div>
 
-    <!-- S2: Grade Selection -->
-    <div id="screen2" class="screen full-blue">
-        <h1>صف كم؟</h1>
-        <button class="btn" onclick="selectGrade('خامس')">خامس</button>
-        <button class="btn btn-disabled">سادس</button>
-        <button class="btn btn-disabled">سابع</button>
-        <button class="btn btn-disabled">ثامن</button>
-        <button class="btn btn-disabled">تاسع</button>
-        <button class="btn btn-disabled">عاشر</button>
+    <div id="screen2" class="screen">
+        <h1>أي صف أنت؟</h1>
+        <div id="grades" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
+        <button class="btn" style="background:#eee;" onclick="goTo('screen1')">رجوع</button>
     </div>
 
-    <!-- S3: Subject Selection -->
-    <div id="screen3" class="screen" style="display:none; flex-direction:column; align-items:center; height:auto;">
-        <h2 style="text-align:center;">اختر المادة</h2>
-        <div id="subjectList" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
-        <button class="btn" style="background:#ddd;" onclick="goTo('screen2')">رجوع</button>
+    <div id="screen3" class="screen">
+        <h2 id="gradeTitle"></h2>
+        <div id="subjects" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
     </div>
 
-    <!-- S4: Dashboard -->
-    <div id="screen4" class="screen" style="display:none; flex-direction:column; align-items:center; height:auto;">
+    <div id="screen4" class="screen">
         <nav>
-            <span>الستريك: 0</span>
-            <span>المؤقت: 00:00</span>
+            <span onclick="goTo('screenTimer')">المؤقت</span>
+            <span onclick="goTo('screenProgress')">التقدم</span>
+            <span id="streakDisplay">الستريك: 0</span>
         </nav>
         <div class="card">
-            <h2 id="lessonTitle">هل أنت مستعد لبدء الدرس؟</h2>
-            <button id="mainBtn" class="btn" onclick="nextStep()" style="width:100%;">نعم</button>
+            <h2 id="dashTitle"></h2>
+            <button class="btn" onclick="nextLesson()">تم إنهاء الدرس</button>
         </div>
+        <div style="display:flex; width:90%; max-width:450px; gap:10px;">
+            <div class="card"><h3>الأهداف</h3><div contenteditable="true" id="goals">...</div></div>
+            <div class="card"><h3>التحديات</h3><div contenteditable="true" id="challenges">...</div></div>
+        </div>
+        <button class="btn" style="background:#eee;" onclick="goTo('screen3')">رجوع</button>
+    </div>
+
+    <div id="screenTimer" class="screen">
         <div class="card">
-            <h2>أهدافي وتحدياتي</h2>
-            <p><strong>هدفي:</strong> <span contenteditable="true">اكتب هدفك...</span></p>
-            <p><strong>تحدي يومي:</strong> <span contenteditable="true">أنهِ درسين اليوم.</span></p>
-            <p><strong>تحدي شهري:</strong> <span contenteditable="true">راجع الوحدة الثانية.</span></p>
-            <p><strong>تحدي فصلي:</strong> <span contenteditable="true">تحقيق الدرجة النهائية.</span></p>
+            <h1>المؤقت المخصص</h1>
+            <input type="number" id="timerInput" value="25"> دقيقة
+            <br><br>
+            <button class="btn" onclick="startTimer()">ابدأ العمل</button>
+            <h2 id="timeRemaining">00:00</h2>
+            <button class="btn" style="background:#eee;" onclick="goTo('screen4')">عودة</button>
         </div>
-        <button class="btn" style="background:#dc3545; color:white; width:100%;" onclick="finishBook()">انهيت الكتاب!</button>
     </div>
 
-    <div id="popup" class="popup">
-        <p>أحسنت! واصل التقدم.</p>
-        <button class="btn" onclick="closePopup()">شكراً</button>
-    </div>
-
-    <div id="screenFinal" class="screen full-blue" style="text-align:center;">
-        <h1>مبارك لك! 🎉</h1>
-        <p style="font-size: 1.3rem;">أنت بطل حقيقي! لقد أنهيت الكتاب بالكامل بجهدك وعزيمتك. استمر في هذا التألق دائماً!</p>
-        <button class="btn" onclick="goTo('screen3')">رجوع</button>
+    <div id="screenProgress" class="screen">
+        <div class="card">
+            <h1>سجل التقدم</h1>
+            <div id="progressList" style="width:100%"></div>
+            <button class="btn" onclick="goTo('screen4')">عودة</button>
+        </div>
     </div>
 
     <script>
-        function goTo(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            localStorage.setItem('lastScreen', id);
-        }
+        let state = JSON.parse(localStorage.getItem('studyState')) || { streak: 0, progress: {}, goals: {}, challenges: {} };
+        let currentSub = "";
 
-        function selectGrade(grade) {
-            const list = document.getElementById('subjectList');
-            list.innerHTML = "";
-            let subjects = ["عربي", "إسلامية", "رياضيات", "علوم", "إنجليزي", "دراسات"];
-            if (grade === "تاسع" || grade === "عاشر") subjects = ["عربي", "إسلامية", "رياضيات", "فيزياء", "كيمياء", "أحياء", "إنجليزي", "دراسات"];
-            subjects.forEach(sub => { list.innerHTML += `<button class="btn" onclick="startSubject('${sub}')">${sub}</button>`; });
+        function goTo(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+        function selectGrade(g) {
+            document.getElementById('gradeTitle').innerText = g;
+            let subs = (g === "تاسع" || g === "عاشر") ? ["عربي", "إسلامية", "رياضيات", "فيزياء", "كيمياء", "أحياء", "إنجليزي", "دراسات"] : ["عربي", "إسلامية", "رياضيات", "علوم", "إنجليزي", "دراسات"];
+            document.getElementById('subjects').innerHTML = "";
+            subs.forEach(s => document.getElementById('subjects').innerHTML += `<button class="btn" onclick="startSub('${s}')">${s}</button>`);
             goTo('screen3');
         }
 
-        function startSubject(sub) {
-            document.getElementById('lessonTitle').innerText = `هل أنت مستعد لبدء الدرس في ${sub}؟`;
+        function startSub(s) {
+            currentSub = s;
+            document.getElementById('dashTitle').innerText = s;
             goTo('screen4');
         }
 
-        function nextStep() {
-            const btn = document.getElementById('mainBtn');
-            const title = document.getElementById('lessonTitle');
-            if (btn.innerText === "نعم") {
-                title.innerText = `رائع! عندما تنتهي من الدرس، اضغط الزر.`;
-                btn.innerText = "انهيت الدرس";
-            } else {
-                document.getElementById('popup').style.display = 'block';
-                title.innerText = `هل أنت مستعد لبدء الدرس القادم؟`;
-                btn.innerText = "نعم";
-            }
+        function nextLesson() {
+            state.progress[currentSub] = (state.progress[currentSub] || 0) + 1;
+            localStorage.setItem('studyState', JSON.stringify(state));
+            alert("تمت إضافة الدرس.");
         }
 
-        function closePopup() { document.getElementById('popup').style.display = 'none'; }
-        function finishBook() { goTo('screenFinal'); }
+        function startTimer() {
+            let mins = document.getElementById('timerInput').value;
+            let time = mins * 60;
+            let display = document.getElementById('timeRemaining');
+            let interval = setInterval(() => {
+                time--;
+                display.innerText = Math.floor(time/60) + ":" + (time%60).toString().padStart(2, '0');
+                if(time <= 0) { 
+                    clearInterval(interval); 
+                    state.streak++; 
+                    localStorage.setItem('studyState', JSON.stringify(state)); 
+                    document.getElementById('streakDisplay').innerText = "الستريك: " + state.streak;
+                    alert("انتهى الوقت!"); 
+                }
+            }, 1000);
+        }
 
-        window.onload = () => {
-            const last = localStorage.getItem('lastScreen') || 'screen1';
-            goTo(last);
-        };
+        ["خامس", "سادس", "سابع", "ثامن", "تاسع", "عاشر"].forEach(g => document.getElementById('grades').innerHTML += `<button class="btn" onclick="selectGrade('${g}')">${g}</button>`);
     </script>
 </body>
 </html>
