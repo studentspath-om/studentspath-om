@@ -6,8 +6,20 @@
     <title>محطة الدراسة</title>
     <style>
         body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #007bff; font-family: sans-serif; }
-        .container { text-align: center; width: 90%; display: none; }
-        .active { display: block; }
+        
+        /* Transition style for soft effect */
+        .container { 
+            text-align: center; 
+            width: 90%; 
+            display: none; 
+            opacity: 0; 
+            transition: opacity 0.5s ease;
+        }
+        .active { 
+            display: block; 
+            opacity: 1; 
+        }
+        
         h1 { color: white; }
         .btn { background-color: yellow; color: black; border: none; padding: 10px 20px; font-size: 1rem; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; width: 80%; max-width: 300px; display: block; margin-left: auto; margin-right: auto; }
         .back-btn { background-color: #ffcccc; margin-top: 20px; }
@@ -41,7 +53,8 @@
 
     <div id="dashboard" class="container">
         <h1 id="currentSubjectTitle"></h1>
-        <input type="number" id="teacherLessons" placeholder="دروس المعلم" onchange="updateTeacherLessons()">
+        <label style="color: white;">دروس المعلم:</label>
+        <input type="number" id="teacherLessons" onchange="updateTeacherLessons()">
         <div class="timer-display" id="timer">25:00</div>
         <button class="btn" onclick="startTimer()">ابدأ</button>
         <button class="btn" onclick="stopTimer()">إيقاف</button>
@@ -87,8 +100,13 @@
         ];
 
         function showScreen(id) {
-            document.querySelectorAll('.container').forEach(d => d.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.container').forEach(d => {
+                d.classList.remove('active');
+                d.style.display = 'none';
+            });
+            let target = document.getElementById(id);
+            target.style.display = 'block';
+            setTimeout(() => target.classList.add('active'), 50);
         }
 
         function setGrade(grade) {
@@ -98,7 +116,12 @@
             subs.forEach(s => {
                 let b = document.createElement('button');
                 b.className = "btn"; b.innerText = s;
-                b.onclick = () => { currentSubject = s; document.getElementById('currentSubjectTitle').innerText = s; showScreen('dashboard'); };
+                b.onclick = () => { 
+                    currentSubject = s; 
+                    document.getElementById('currentSubjectTitle').innerText = s; 
+                    document.getElementById('teacherLessons').value = data[s].teacher;
+                    showScreen('dashboard'); 
+                };
                 list.appendChild(b);
             });
             showScreen('subjects-screen');
@@ -134,7 +157,7 @@
             });
         }
 
-        function startTimer() { if(!timerId) timerId = setInterval(() => { timeLeft--; document.getElementById('timer').innerText = Math.floor(timeLeft/60) + ":" + (timeLeft%60); }, 1000); }
+        function startTimer() { if(!timerId) timerId = setInterval(() => { timeLeft--; document.getElementById('timer').innerText = Math.floor(timeLeft/60) + ":" + (timeLeft%60).toString().padStart(2, '0'); }, 1000); }
         function stopTimer() { clearInterval(timerId); timerId = null; }
     </script>
 </body>
