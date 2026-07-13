@@ -6,15 +6,15 @@
     <title>محطة الدراسة</title>
     <style>
         body { margin: 0; font-family: 'Arial', sans-serif; background: #f4f4f9; }
-        .screen { display: none; padding: 20px; }
-        .active { display: block; }
-        .full-blue { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #007bff; color: white; }
+        .screen { display: none; padding: 20px; height: 100vh; box-sizing: border-box; }
+        .active { display: flex !important; flex-direction: column; align-items: center; justify-content: center; }
+        .full-blue { background: #007bff; color: white; width: 100%; text-align: center; }
         .btn { background: #FFC107; color: #333; padding: 15px 25px; border-radius: 10px; border: none; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin: 10px; width: 80%; max-width: 300px; }
         .btn-disabled { background: #cccccc; color: #666; cursor: not-allowed; }
-        .card { background: white; padding: 20px; margin: 15px 0; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .popup { position: fixed; top: 30%; left: 10%; width: 80%; background: #FFC107; padding: 20px; border-radius: 10px; text-align: center; display: none; z-index: 100; }
+        .card { background: white; padding: 20px; margin: 15px 0; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 90%; max-width: 400px; }
+        .popup { position: fixed; top: 30%; left: 10%; width: 80%; background: #FFC107; padding: 20px; border-radius: 10px; text-align: center; display: none; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         h2 { color: #007bff; border-bottom: 2px solid #FFC107; padding-bottom: 5px; }
-        nav { background: #333; color: white; padding: 10px; display: flex; justify-content: space-around; border-radius: 0 0 10px 10px; margin-bottom: 15px; font-weight: bold; }
+        nav { background: #333; color: white; padding: 10px; display: flex; justify-content: space-around; width: 100%; border-radius: 0 0 10px 10px; margin-bottom: 15px; font-weight: bold; }
         [contenteditable="true"] { border: 1px dashed #ccc; padding: 5px; border-radius: 5px; display: block; min-height: 20px; }
     </style>
 </head>
@@ -38,24 +38,22 @@
     </div>
 
     <!-- S3: Subject Selection -->
-    <div id="screen3" class="screen">
+    <div id="screen3" class="screen" style="display:none; flex-direction:column; align-items:center; height:auto;">
         <h2 style="text-align:center;">اختر المادة</h2>
-        <div id="subjectList" style="text-align:center; display:flex; flex-direction:column; align-items:center;"></div>
+        <div id="subjectList" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
         <button class="btn" style="background:#ddd;" onclick="goTo('screen2')">رجوع</button>
     </div>
 
     <!-- S4: Dashboard -->
-    <div id="screen4" class="screen">
+    <div id="screen4" class="screen" style="display:none; flex-direction:column; align-items:center; height:auto;">
         <nav>
             <span>الستريك: 0</span>
             <span>المؤقت: 00:00</span>
         </nav>
-        
         <div class="card">
-            <h2 id="lessonTitle">هل أنت مستعد لبدء الدرس الأول؟</h2>
+            <h2 id="lessonTitle">هل أنت مستعد لبدء الدرس؟</h2>
             <button id="mainBtn" class="btn" onclick="nextStep()" style="width:100%;">نعم</button>
         </div>
-
         <div class="card">
             <h2>أهدافي وتحدياتي</h2>
             <p><strong>هدفي:</strong> <span contenteditable="true">اكتب هدفك...</span></p>
@@ -63,16 +61,9 @@
             <p><strong>تحدي شهري:</strong> <span contenteditable="true">راجع الوحدة الثانية.</span></p>
             <p><strong>تحدي فصلي:</strong> <span contenteditable="true">تحقيق الدرجة النهائية.</span></p>
         </div>
-
         <button class="btn" style="background:#dc3545; color:white; width:100%;" onclick="finishBook()">انهيت الكتاب!</button>
-        
-        <div class="card">
-            <h2>التقدم</h2>
-            <div id="progressList"></div>
-        </div>
     </div>
 
-    <!-- Popups -->
     <div id="popup" class="popup">
         <p>أحسنت! واصل التقدم.</p>
         <button class="btn" onclick="closePopup()">شكراً</button>
@@ -80,20 +71,15 @@
 
     <div id="screenFinal" class="screen full-blue" style="text-align:center;">
         <h1>مبارك لك! 🎉</h1>
-        <p style="font-size: 1.3rem;">أنت بطل حقيقي! لقد أنهيت الكتاب بالكامل بجهدك وعزيمتك. هذا الإنجاز دليل على تميزك، ونحن فخورون جداً بك.</p>
+        <p style="font-size: 1.3rem;">أنت بطل حقيقي! لقد أنهيت الكتاب بالكامل بجهدك وعزيمتك. استمر في هذا التألق دائماً!</p>
         <button class="btn" onclick="goTo('screen3')">رجوع</button>
     </div>
 
     <script>
-        let selectedSubject = "";
-        let progressData = JSON.parse(localStorage.getItem('studyProgress')) || 
-                           { "رياضيات": 0, "عربي": 0, "إسلامية": 0, "علوم": 0, "إنجليزي": 0, "دراسات": 0, "فيزياء": 0, "كيمياء": 0, "أحياء": 0 };
-
         function goTo(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            localStorage.setItem('currentScreen', id);
-            if(id === 'screen4') updateProgress();
+            localStorage.setItem('lastScreen', id);
         }
 
         function selectGrade(grade) {
@@ -106,7 +92,7 @@
         }
 
         function startSubject(sub) {
-            selectedSubject = sub;
+            document.getElementById('lessonTitle').innerText = `هل أنت مستعد لبدء الدرس في ${sub}؟`;
             goTo('screen4');
         }
 
@@ -114,36 +100,21 @@
             const btn = document.getElementById('mainBtn');
             const title = document.getElementById('lessonTitle');
             if (btn.innerText === "نعم") {
-                title.innerText = `رائع! عندما تنتهي من ${selectedSubject}، اضغط الزر.`;
+                title.innerText = `رائع! عندما تنتهي من الدرس، اضغط الزر.`;
                 btn.innerText = "انهيت الدرس";
             } else {
-                progressData[selectedSubject]++;
-                localStorage.setItem('studyProgress', JSON.stringify(progressData));
                 document.getElementById('popup').style.display = 'block';
                 title.innerText = `هل أنت مستعد لبدء الدرس القادم؟`;
                 btn.innerText = "نعم";
-                updateProgress();
             }
         }
 
         function closePopup() { document.getElementById('popup').style.display = 'none'; }
         function finishBook() { goTo('screenFinal'); }
 
-        function updateProgress() {
-            const container = document.getElementById('progressList');
-            container.innerHTML = "";
-            for (let sub in progressData) {
-                if(progressData[sub] >= 0) {
-                    let warning = progressData[sub] < 1 ? "<br><small style='color:red;'>ملاحظة: هذه المادة تحتاج إلى المزيد من الدراسة!</small>" : "";
-                    container.innerHTML += `<p><strong>${sub}:</strong> ${progressData[sub]} دروس منجزة ${warning}</p>`;
-                }
-            }
-        }
-
         window.onload = () => {
-            const savedScreen = localStorage.getItem('currentScreen') || 'screen1';
-            goTo(savedScreen);
-            updateProgress();
+            const last = localStorage.getItem('lastScreen') || 'screen1';
+            goTo(last);
         };
     </script>
 </body>
