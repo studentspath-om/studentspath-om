@@ -6,19 +6,12 @@
     <style>
         :root { --soft-blue: #a8d8ea; --paper-bg: #fffcf2; --accent: #ffb7b2; }
         body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--soft-blue); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
-        
-        .sticker { position: fixed; width: 120px; z-index: -1; opacity: 0.8; }
-        
         .screen { display: none; padding: 20px; width: 100%; flex-direction: column; align-items: center; }
         .active { display: flex; }
-        
         .btn { background: white; border: 2px solid var(--accent); padding: 12px 25px; border-radius: 20px; font-weight: bold; cursor: pointer; margin: 8px; width: 80%; max-width: 300px; transition: 0.3s; box-shadow: 3px 3px 0px var(--accent); }
         .btn:hover { background: var(--accent); color: white; }
-        
         .card { background: var(--paper-bg); padding: 20px; margin: 10px; border-radius: 30px; width: 85%; max-width: 400px; box-shadow: 5px 5px 15px rgba(0,0,0,0.1); border: 1px solid #eee; text-align: center; }
-        
         input { padding: 10px; border-radius: 15px; border: 2px solid var(--soft-blue); width: 60px; text-align: center; font-size: 1.2rem; }
-        
         nav { background: rgba(255,255,255,0.7); padding: 10px 20px; width: 80%; display: flex; justify-content: space-between; border-radius: 20px; margin-bottom: 20px; backdrop-filter: blur(5px); cursor: pointer; }
     </style>
 </head>
@@ -43,12 +36,17 @@
     <div id="screen4" class="screen">
         <nav>
             <span onclick="goTo('screenTimer')">المؤقت</span>
-            <span onclick="goTo('screenProgress')">التقدم</span>
+            <span onclick="updateProgressScreen(); goTo('screenProgress');">التقدم</span>
             <span id="streakDisplay">الستريك: 0</span>
         </nav>
         <div class="card">
             <h2 id="dashTitle"></h2>
             <button class="btn" onclick="nextLesson()">تم إنهاء الدرس</button>
+        </div>
+        <div class="card" style="font-size: 0.9rem; text-align: right;">
+            <p><strong>طريقة الاستخدام:</strong></p>
+            <p>- عند انتهاء مؤقت البومودورو، سيزداد الستريك الخاص بك بمقدار واحد.</p>
+            <p>- بعد إنهاء كل درس، اضغط على "تم إنهاء الدرس" لتسجيل تقدمك.</p>
         </div>
         <div style="display:flex; width:90%; max-width:450px; gap:10px;">
             <div class="card"><h3>الأهداف</h3><div contenteditable="true" id="goals">...</div></div>
@@ -63,6 +61,7 @@
             <input type="number" id="timerInput" value="25"> دقيقة
             <br><br>
             <button class="btn" onclick="startTimer()">ابدأ العمل</button>
+            <button class="btn" onclick="stopTimer()">إيقاف</button>
             <h2 id="timeRemaining">00:00</h2>
             <button class="btn" style="background:#eee;" onclick="goTo('screen4')">عودة</button>
         </div>
@@ -79,6 +78,7 @@
     <script>
         let state = JSON.parse(localStorage.getItem('studyState')) || { streak: 0, progress: {}, goals: {}, challenges: {} };
         let currentSub = "";
+        let timerInterval = null;
 
         function goTo(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
@@ -99,24 +99,38 @@
         function nextLesson() {
             state.progress[currentSub] = (state.progress[currentSub] || 0) + 1;
             localStorage.setItem('studyState', JSON.stringify(state));
-            alert("تمت إضافة الدرس.");
+            alert("تم تسجيل الدرس.");
         }
 
         function startTimer() {
+            stopTimer();
             let mins = document.getElementById('timerInput').value;
             let time = mins * 60;
-            let display = document.getElementById('timeRemaining');
-            let interval = setInterval(() => {
+            timerInterval = setInterval(() => {
                 time--;
-                display.innerText = Math.floor(time/60) + ":" + (time%60).toString().padStart(2, '0');
+                document.getElementById('timeRemaining').innerText = Math.floor(time/60) + ":" + (time%60).toString().padStart(2, '0');
                 if(time <= 0) { 
-                    clearInterval(interval); 
+                    clearInterval(timerInterval); 
                     state.streak++; 
                     localStorage.setItem('studyState', JSON.stringify(state)); 
                     document.getElementById('streakDisplay').innerText = "الستريك: " + state.streak;
-                    alert("انتهى الوقت!"); 
+                    alert("انتهى الوقت! تمت زيادة الستريك."); 
                 }
             }, 1000);
+        }
+
+        function stopTimer() { clearInterval(timerInterval); }
+
+        function updateProgressScreen() {
+            let list = document.getElementById('progressList');
+            list.innerHTML = "";
+            let progress = state.progress;
+            let counts = Object.values(progress);
+            let max = counts.length > 0 ? Math.max(...counts) : 0;
+            for(let s in progress) {
+                let warn = (progress[s] < max) ? "<br><small style='color:red'>ملاحظة: قد تحتاج هذه المادة إلى المزيد من الدراسة!</small>" : "";
+                list.innerHTML += `<div class='card' style='padding:10px;'><strong>${s}:</strong> ${progress[s]} درس ${warn}</div>`;
+            }
         }
 
         ["خامس", "سادس", "سابع", "ثامن", "تاسع", "عاشر"].forEach(g => document.getElementById('grades').innerHTML += `<button class="btn" onclick="selectGrade('${g}')">${g}</button>`);
