@@ -6,14 +6,19 @@
   <title>نظام صندوق لايتنر</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --accent: #38bdf8;
-      --text: #f8fafc;
-      --text-dim: #94a3b8;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --border: #334155;
+      --bg: #faf7f2;               /* Creamy Warm Beige */
+      --card-bg: #ffffff;          /* Pure White */
+      --accent: #f472b6;           /* Cute Soft Pink */
+      --accent-hover: #ec4899;     /* Deep Pink */
+      --accent-light: #fdf2f8;     /* Ultra Light Pink */
+      --text: #4a3e3d;             /* Soft Warm Brown (Easier on eyes than pitch black) */
+      --text-dim: #9e8e8c;         /* Muted Dusty Brown */
+      --success: #86efac;          /* Soft Pastel Green */
+      --success-text: #166534;
+      --danger: #fca5a5;           /* Soft Pastel Red */
+      --danger-text: #991b1b;
+      --border: #f3e8e6;           /* Subtle Beige/Pink Border */
+      --shadow: rgba(236, 72, 153, 0.08); /* Cute Pink Glow Shadow */
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
@@ -25,28 +30,39 @@
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
-      padding: 20px;
+      padding: 24px 16px;
     }
 
     header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
-    h1 { font-size: 1.8rem; color: var(--accent); margin-bottom: 5px; }
-    p.subtitle { color: var(--text-dim); font-size: 0.9rem; }
+    h1 { 
+      font-size: 1.9rem; 
+      color: var(--accent); 
+      margin-bottom: 6px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    p.subtitle { color: var(--text-dim); font-size: 0.95rem; font-weight: 500; }
 
     /* Filter Bar */
     .filter-container {
       width: 100%;
       max-width: 500px;
-      margin-bottom: 15px;
+      margin-bottom: 16px;
       display: flex;
-      gap: 10px;
+      gap: 12px;
       align-items: center;
+      background: var(--card-bg);
+      padding: 12px 16px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px var(--shadow);
     }
 
-    .filter-container label { font-size: 0.9rem; color: var(--text-dim); }
+    .filter-container label { font-size: 0.9rem; color: var(--text-dim); font-weight: 600; white-space: nowrap; }
 
     /* Box Stats Bar */
     .boxes-container {
@@ -61,28 +77,29 @@
     .box-stat {
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 5px;
+      border-radius: 14px;
+      padding: 10px 4px;
       text-align: center;
+      box-shadow: 0 4px 12px var(--shadow);
     }
 
-    .box-stat .title { font-size: 0.75rem; color: var(--text-dim); display: block; }
-    .box-stat .count { font-size: 1.2rem; font-weight: bold; color: var(--accent); }
+    .box-stat .title { font-size: 0.75rem; color: var(--text-dim); display: block; font-weight: 600; }
+    .box-stat .count { font-size: 1.25rem; font-weight: 800; color: var(--accent); }
 
     /* Flashcard Container */
     .card-container {
       width: 100%;
       max-width: 500px;
       perspective: 1000px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .flashcard {
       background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      min-height: 220px;
-      padding: 25px;
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      min-height: 230px;
+      padding: 28px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -90,59 +107,84 @@
       text-align: center;
       cursor: pointer;
       position: relative;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      transition: transform 0.2s;
+      box-shadow: 0 10px 30px var(--shadow);
+      transition: all 0.25s ease;
+    }
+
+    .flashcard:hover {
+      transform: translateY(-2px);
+      border-color: #fbcfe8;
     }
 
     .flashcard:active { transform: scale(0.98); }
 
     .card-label {
       position: absolute;
-      top: 12px;
-      right: 15px;
+      top: 14px;
+      right: 18px;
       font-size: 0.75rem;
       color: var(--text-dim);
+      font-weight: 600;
     }
 
     .card-subject {
       position: absolute;
-      top: 12px;
-      left: 15px;
+      top: 14px;
+      left: 18px;
       font-size: 0.75rem;
       color: var(--accent);
-      background: rgba(56, 189, 248, 0.1);
-      padding: 2px 8px;
-      border-radius: 4px;
-      border: 1px solid var(--accent);
+      background: var(--accent-light);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 700;
     }
 
-    .card-content { font-size: 1.25rem; font-weight: 500; word-break: break-word; line-height: 1.6; }
+    .card-content { font-size: 1.3rem; font-weight: 600; word-break: break-word; line-height: 1.6; color: var(--text); }
+
+    /* Card Management Tools */
+    .card-tools {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 16px;
+    }
+
+    .card-tools button {
+      padding: 10px;
+      font-size: 0.85rem;
+      border-radius: 12px;
+    }
+
+    .btn-edit { background-color: #fbe7e8; color: #9f2b68; }
+    .btn-delete { background-color: var(--danger); color: var(--danger-text); }
 
     /* Controls */
     .controls {
       display: flex;
-      gap: 15px;
+      gap: 12px;
       width: 100%;
       max-width: 500px;
-      margin-bottom: 30px;
+      margin-bottom: 28px;
     }
 
     button {
       flex: 1;
-      padding: 12px;
+      padding: 14px;
       border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: bold;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
 
-    button:hover { opacity: 0.9; }
+    button:hover { opacity: 0.92; transform: translateY(-1px); }
 
-    .btn-wrong { background-color: var(--danger); color: white; }
-    .btn-correct { background-color: var(--success); color: white; }
-    .btn-flip { background-color: var(--accent); color: #000; }
+    .btn-wrong { background-color: var(--danger); color: var(--danger-text); }
+    .btn-correct { background-color: var(--success); color: var(--success-text); }
+    .btn-flip { background-color: var(--accent); color: white; }
 
     /* Add Card Section */
     .add-section {
@@ -150,26 +192,33 @@
       max-width: 500px;
       background: var(--card-bg);
       border: 1px solid var(--border);
-      padding: 20px;
-      border-radius: 12px;
+      padding: 22px;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px var(--shadow);
     }
 
-    .add-section h2 { font-size: 1.1rem; margin-bottom: 12px; color: var(--accent); }
+    .add-section h2 { font-size: 1.15rem; margin-bottom: 14px; color: var(--accent); font-weight: 800; }
 
     input, textarea, select {
       width: 100%;
       background: var(--bg);
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 10px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin-bottom: 12px;
       font-size: 0.95rem;
+      outline: none;
+      transition: border 0.2s;
     }
 
-    textarea { resize: vertical; min-height: 60px; }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+    }
 
-    .btn-add { background: var(--accent); color: #000; width: 100%; }
+    textarea { resize: vertical; min-height: 70px; }
+
+    .btn-add { background: var(--accent); color: white; width: 100%; font-size: 1rem; }
 
     .hidden { display: none !important; }
   </style>
@@ -214,6 +263,12 @@
     </div>
   </div>
 
+  <!-- Card Edit/Delete Tools -->
+  <div class="card-tools hidden" id="card-tools">
+    <button class="btn-edit" onclick="editCurrentCard()">تعديل البطاقة</button>
+    <button class="btn-delete" onclick="deleteCurrentCard()">حذف البطاقة</button>
+  </div>
+
   <!-- Response Controls -->
   <div class="controls hidden" id="action-controls">
     <button class="btn-wrong" onclick="processAnswer(false)">خطأ (إعادة للصندوق 1)</button>
@@ -225,7 +280,7 @@
 
   <!-- New Card Input Form -->
   <div class="add-section">
-    <h2>إضافة بطاقة جديدة</h2>
+    <h2 id="form-title">إضافة بطاقة جديدة</h2>
     <select id="add-subject">
       <option value="الرياضيات">الرياضيات</option>
       <option value="الفيزياء">الفيزياء</option>
@@ -237,15 +292,15 @@
     </select>
     <input type="text" id="front-input" placeholder="السؤال أو المفهوم (الوجه الأول)">
     <textarea id="back-input" placeholder="الإجابة أو الشرح (الوجه الثاني)"></textarea>
-    <button class="btn-add" onclick="addCard()">حفظ في الصندوق 1</button>
+    <button class="btn-add" id="form-submit-btn" onclick="saveCardAction()">حفظ في الصندوق 1</button>
   </div>
 
   <script>
     let cards = JSON.parse(localStorage.getItem('leitner_cards')) || [];
     let currentCardIndex = -1;
+    let editingIndex = -1;
     let showingFront = true;
 
-    // Save cards and state instantly
     function saveState() {
       localStorage.setItem('leitner_cards', JSON.stringify(cards));
       localStorage.setItem('leitner_filter', document.getElementById('filter-subject').value);
@@ -288,6 +343,7 @@
         document.getElementById('card-subject-tag').classList.add('hidden');
         document.getElementById('flip-control').classList.add('hidden');
         document.getElementById('action-controls').classList.add('hidden');
+        document.getElementById('card-tools').classList.add('hidden');
         currentCardIndex = -1;
         saveState();
         return;
@@ -313,6 +369,7 @@
       subjectTag.classList.remove('hidden');
 
       document.getElementById('card-text').textContent = showingFront ? currentCard.front : currentCard.back;
+      document.getElementById('card-tools').classList.remove('hidden');
 
       if (showingFront) {
         document.getElementById('flip-control').classList.remove('hidden');
@@ -344,7 +401,7 @@
       getNextCard();
     }
 
-    function addCard() {
+    function saveCardAction() {
       const subject = document.getElementById('add-subject').value;
       const front = document.getElementById('front-input').value.trim();
       const back = document.getElementById('back-input').value.trim();
@@ -354,7 +411,20 @@
         return;
       }
 
-      cards.push({ subject, front, back, box: 1 });
+      if (editingIndex !== -1) {
+        // Update existing card
+        cards[editingIndex].subject = subject;
+        cards[editingIndex].front = front;
+        cards[editingIndex].back = back;
+        
+        // Reset editing state
+        editingIndex = -1;
+        document.getElementById('form-title').textContent = "إضافة بطاقة جديدة";
+        document.getElementById('form-submit-btn').textContent = "حفظ في الصندوق 1";
+      } else {
+        // Add new card
+        cards.push({ subject, front, back, box: 1 });
+      }
       
       document.getElementById('front-input').value = '';
       document.getElementById('back-input').value = '';
@@ -363,12 +433,39 @@
       getNextCard();
     }
 
-    // Auto-save mechanisms on exit or typing
+    function editCurrentCard() {
+      if (currentCardIndex === -1) return;
+      const card = cards[currentCardIndex];
+      
+      document.getElementById('add-subject').value = card.subject;
+      document.getElementById('front-input').value = card.front;
+      document.getElementById('back-input').value = card.back;
+
+      editingIndex = currentCardIndex;
+      document.getElementById('form-title').textContent = "تعديل البطاقة الحالية";
+      document.getElementById('form-submit-btn').textContent = "تحديث البطاقة";
+      
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function deleteCurrentCard() {
+      if (currentCardIndex === -1) return;
+      if (confirm('هل أنت متأكد من حذف هذه البطاقة؟')) {
+        cards.splice(currentCardIndex, 1);
+        editingIndex = -1;
+        document.getElementById('form-title').textContent = "إضافة بطاقة جديدة";
+        document.getElementById('form-submit-btn').textContent = "حفظ في الصندوق 1";
+        document.getElementById('front-input').value = '';
+        document.getElementById('back-input').value = '';
+        saveState();
+        getNextCard();
+      }
+    }
+
     window.addEventListener('beforeunload', saveState);
     document.getElementById('front-input').addEventListener('input', saveState);
     document.getElementById('back-input').addEventListener('input', saveState);
 
-    // Initial load
     restoreState();
     getNextCard();
   </script>
