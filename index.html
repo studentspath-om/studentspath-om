@@ -11,7 +11,7 @@
       --accent: #f472b6;           /* Cute Soft Pink */
       --accent-hover: #ec4899;     /* Deep Pink */
       --accent-light: #fdf2f8;     /* Ultra Light Pink */
-      --text: #4a3e3d;             /* Soft Warm Brown (Easier on eyes than pitch black) */
+      --text: #4a3e3d;             /* Soft Warm Brown */
       --text-dim: #9e8e8c;         /* Muted Dusty Brown */
       --success: #86efac;          /* Soft Pastel Green */
       --success-text: #166534;
@@ -64,7 +64,7 @@
 
     .filter-container label { font-size: 0.9rem; color: var(--text-dim); font-weight: 600; white-space: nowrap; }
 
-    /* Box Stats Bar */
+    /* Box Stats Bar (Clickable) */
     .boxes-container {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -76,11 +76,23 @@
 
     .box-stat {
       background: var(--card-bg);
-      border: 1px solid var(--border);
+      border: 2px solid var(--border);
       border-radius: 14px;
       padding: 10px 4px;
       text-align: center;
       box-shadow: 0 4px 12px var(--shadow);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .box-stat:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .box-stat.active {
+      border-color: var(--accent);
+      background: var(--accent-light);
     }
 
     .box-stat .title { font-size: 0.75rem; color: var(--text-dim); display: block; font-weight: 600; }
@@ -137,6 +149,16 @@
       padding: 4px 10px;
       border-radius: 12px;
       font-weight: 700;
+    }
+
+    .card-timer {
+      margin-top: 15px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #e11d48;
+      background: #ffe4e6;
+      padding: 6px 12px;
+      border-radius: 10px;
     }
 
     .card-content { font-size: 1.3rem; font-weight: 600; word-break: break-word; line-height: 1.6; color: var(--text); }
@@ -233,7 +255,7 @@
   <!-- Subject Filter -->
   <div class="filter-container">
     <label for="filter-subject">تصفية حسب المادة:</label>
-    <select id="filter-subject" onchange="getNextCard()">
+    <select id="filter-subject" onchange="renderCurrentBox()">
       <option value="ALL">جميع المواد</option>
       <option value="الرياضيات">الرياضيات</option>
       <option value="الفيزياء">الفيزياء</option>
@@ -245,13 +267,13 @@
     </select>
   </div>
 
-  <!-- Box Counters -->
+  <!-- Clickable Box Counters -->
   <div class="boxes-container">
-    <div class="box-stat"><span class="title">الصندوق 1</span><span class="count" id="count-1">0</span></div>
-    <div class="box-stat"><span class="title">الصندوق 2</span><span class="count" id="count-2">0</span></div>
-    <div class="box-stat"><span class="title">الصندوق 3</span><span class="count" id="count-3">0</span></div>
-    <div class="box-stat"><span class="title">الصندوق 4</span><span class="count" id="count-4">0</span></div>
-    <div class="box-stat"><span class="title">الصندوق 5</span><span class="count" id="count-5">0</span></div>
+    <div class="box-stat active" id="box-btn-1" onclick="selectBox(1)"><span class="title">الصندوق 1</span><span class="count" id="count-1">0</span></div>
+    <div class="box-stat" id="box-btn-2" onclick="selectBox(2)"><span class="title">الصندوق 2</span><span class="count" id="count-2">0</span></div>
+    <div class="box-stat" id="box-btn-3" onclick="selectBox(3)"><span class="title">الصندوق 3</span><span class="count" id="count-3">0</span></div>
+    <div class="box-stat" id="box-btn-4" onclick="selectBox(4)"><span class="title">الصندوق 4</span><span class="count" id="count-4">0</span></div>
+    <div class="box-stat" id="box-btn-5" onclick="selectBox(5)"><span class="title">الصندوق 5</span><span class="count" id="count-5">0</span></div>
   </div>
 
   <!-- Flashcard Display Area -->
@@ -260,6 +282,7 @@
       <span class="card-label" id="card-tag">الوجه الأول</span>
       <span class="card-subject hidden" id="card-subject-tag"></span>
       <div class="card-content" id="card-text">أضف بطاقتك الأولى بالأسفل للبدء في المراجعة!</div>
+      <div class="card-timer hidden" id="card-timer"></div>
     </div>
   </div>
 
@@ -272,7 +295,7 @@
   <!-- Response Controls -->
   <div class="controls hidden" id="action-controls">
     <button class="btn-wrong" onclick="processAnswer(false)">خطأ (إعادة للصندوق 1)</button>
-    <button class="btn-correct" onclick="processAnswer(true)">صحيح (ترقية للصندوق التالي)</button>
+    <button class="btn-correct" id="btn-correct-action" onclick="processAnswer(true)">صحيح (ترقية للصندوق التالي)</button>
   </div>
   <div class="controls" id="flip-control">
     <button class="btn-flip" onclick="flipCard()">إظهار الإجابة</button>
@@ -297,13 +320,26 @@
 
   <script>
     let cards = JSON.parse(localStorage.getItem('leitner_cards')) || [];
-    let currentCardIndex = -1;
+    let activeBox = 1;
+    let boxCards = [];
+    let currentBoxCardIndex = -1;
     let editingIndex = -1;
     let showingFront = true;
+    let timerInterval = null;
+
+    // Days required to lock card per box
+    const BOX_INTERVALS = {
+      1: 0,              // Everyday (Instant)
+      2: 1 * 86400000,   // 1 Day in ms
+      3: 3 * 86400000,   // 3 Days in ms
+      4: 7 * 86400000,   // 7 Days in ms
+      5: 14 * 86400000   // 14 Days in ms
+    };
 
     function saveState() {
       localStorage.setItem('leitner_cards', JSON.stringify(cards));
       localStorage.setItem('leitner_filter', document.getElementById('filter-subject').value);
+      localStorage.setItem('leitner_active_box', activeBox);
       localStorage.setItem('leitner_draft_front', document.getElementById('front-input').value);
       localStorage.setItem('leitner_draft_back', document.getElementById('back-input').value);
       updateCounts();
@@ -313,11 +349,22 @@
       const savedFilter = localStorage.getItem('leitner_filter');
       if (savedFilter) document.getElementById('filter-subject').value = savedFilter;
 
+      const savedBox = localStorage.getItem('leitner_active_box');
+      if (savedBox) activeBox = parseInt(savedBox);
+
       const draftFront = localStorage.getItem('leitner_draft_front');
       if (draftFront) document.getElementById('front-input').value = draftFront;
 
       const draftBack = localStorage.getItem('leitner_draft_back');
       if (draftBack) document.getElementById('back-input').value = draftBack;
+    }
+
+    function selectBox(boxNumber) {
+      activeBox = boxNumber;
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById(`box-btn-${i}`).classList.toggle('active', i === activeBox);
+      }
+      renderCurrentBox();
     }
 
     function getFilteredCards() {
@@ -327,41 +374,40 @@
     }
 
     function updateCounts() {
-      const activeCards = getFilteredCards();
+      const activeSubjectCards = getFilteredCards();
       for (let i = 1; i <= 5; i++) {
-        const count = activeCards.filter(c => c.box === i).length;
+        const count = activeSubjectCards.filter(c => c.box === i).length;
         document.getElementById(`count-${i}`).textContent = count;
       }
     }
 
-    function getNextCard() {
-      const activeCards = getFilteredCards();
+    function renderCurrentBox() {
+      const activeSubjectCards = getFilteredCards();
+      boxCards = activeSubjectCards.filter(c => c.box === activeBox);
 
-      if (activeCards.length === 0) {
-        document.getElementById('card-text').textContent = "لا توجد بطاقات متاحة لهذه المادة. أضف بطاقة جديدة بالأسفل!";
+      if (boxCards.length === 0) {
+        document.getElementById('card-text').textContent = `الصندوق ${activeBox} فارغ حالياً!`;
         document.getElementById('card-tag').textContent = "فارغ";
         document.getElementById('card-subject-tag').classList.add('hidden');
+        document.getElementById('card-timer').classList.add('hidden');
         document.getElementById('flip-control').classList.add('hidden');
         document.getElementById('action-controls').classList.add('hidden');
         document.getElementById('card-tools').classList.add('hidden');
-        currentCardIndex = -1;
+        currentBoxCardIndex = -1;
         saveState();
         return;
       }
 
-      activeCards.sort((a, b) => a.box - b.box);
-      const targetCard = activeCards[0];
-      currentCardIndex = cards.findIndex(c => c === targetCard);
-
+      currentBoxCardIndex = 0;
       showingFront = true;
       saveState();
       renderCard();
     }
 
     function renderCard() {
-      if (currentCardIndex === -1 || cards.length === 0) return;
+      if (currentBoxCardIndex === -1 || boxCards.length === 0) return;
       
-      const currentCard = cards[currentCardIndex];
+      const currentCard = boxCards[currentBoxCardIndex];
       document.getElementById('card-tag').textContent = showingFront ? `الصندوق ${currentCard.box} • الوجه الأول` : `الصندوق ${currentCard.box} • الوجه الثاني`;
       
       const subjectTag = document.getElementById('card-subject-tag');
@@ -371,6 +417,10 @@
       document.getElementById('card-text').textContent = showingFront ? currentCard.front : currentCard.back;
       document.getElementById('card-tools').classList.remove('hidden');
 
+      // Handle Countdown Lock
+      const now = Date.now();
+      const isLocked = currentCard.nextReviewDate && currentCard.nextReviewDate > now;
+
       if (showingFront) {
         document.getElementById('flip-control').classList.remove('hidden');
         document.getElementById('action-controls').classList.add('hidden');
@@ -378,27 +428,67 @@
         document.getElementById('flip-control').classList.add('hidden');
         document.getElementById('action-controls').classList.remove('hidden');
       }
+
+      startCountdown(currentCard.nextReviewDate);
+    }
+
+    function startCountdown(targetTime) {
+      if (timerInterval) clearInterval(timerInterval);
+      const timerElement = document.getElementById('card-timer');
+
+      if (!targetTime || targetTime <= Date.now()) {
+        timerElement.classList.add('hidden');
+        return;
+      }
+
+      timerElement.classList.remove('hidden');
+
+      function updateTimer() {
+        const remaining = targetTime - Date.now();
+        if (remaining <= 0) {
+          timerElement.classList.add('hidden');
+          clearInterval(timerInterval);
+          return;
+        }
+
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+        timerElement.textContent = `مغلق للمراجعة • متبقي: ${hours} س و ${minutes} د و ${seconds} ث`;
+      }
+
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
     }
 
     function flipCard() {
-      if (currentCardIndex === -1 || cards.length === 0) return;
+      if (currentBoxCardIndex === -1 || boxCards.length === 0) return;
       showingFront = !showingFront;
       renderCard();
     }
 
     function processAnswer(isCorrect) {
-      if (currentCardIndex === -1) return;
+      if (currentBoxCardIndex === -1) return;
+
+      const currentCard = boxCards[currentBoxCardIndex];
+      const masterIndex = cards.findIndex(c => c === currentCard);
+
+      if (masterIndex === -1) return;
 
       if (isCorrect) {
-        if (cards[currentCardIndex].box < 5) {
-          cards[currentCardIndex].box += 1;
+        if (cards[masterIndex].box < 5) {
+          cards[masterIndex].box += 1;
         }
+        // Set next countdown based on new box level
+        cards[masterIndex].nextReviewDate = Date.now() + BOX_INTERVALS[cards[masterIndex].box];
       } else {
-        cards[currentCardIndex].box = 1; 
+        cards[masterIndex].box = 1; 
+        cards[masterIndex].nextReviewDate = Date.now(); // Available immediately in Box 1
       }
 
       saveState();
-      getNextCard();
+      renderCurrentBox();
     }
 
     function saveCardAction() {
@@ -412,36 +502,34 @@
       }
 
       if (editingIndex !== -1) {
-        // Update existing card
         cards[editingIndex].subject = subject;
         cards[editingIndex].front = front;
         cards[editingIndex].back = back;
         
-        // Reset editing state
         editingIndex = -1;
         document.getElementById('form-title').textContent = "إضافة بطاقة جديدة";
         document.getElementById('form-submit-btn').textContent = "حفظ في الصندوق 1";
       } else {
-        // Add new card
-        cards.push({ subject, front, back, box: 1 });
+        cards.push({ subject, front, back, box: 1, nextReviewDate: Date.now() });
       }
       
       document.getElementById('front-input').value = '';
       document.getElementById('back-input').value = '';
 
       saveState();
-      getNextCard();
+      selectBox(1); // Jump to Box 1 to show the newly added card
     }
 
     function editCurrentCard() {
-      if (currentCardIndex === -1) return;
-      const card = cards[currentCardIndex];
+      if (currentBoxCardIndex === -1) return;
+      const card = boxCards[currentBoxCardIndex];
+      const masterIndex = cards.findIndex(c => c === card);
       
       document.getElementById('add-subject').value = card.subject;
       document.getElementById('front-input').value = card.front;
       document.getElementById('back-input').value = card.back;
 
-      editingIndex = currentCardIndex;
+      editingIndex = masterIndex;
       document.getElementById('form-title').textContent = "تعديل البطاقة الحالية";
       document.getElementById('form-submit-btn').textContent = "تحديث البطاقة";
       
@@ -449,16 +537,19 @@
     }
 
     function deleteCurrentCard() {
-      if (currentCardIndex === -1) return;
+      if (currentBoxCardIndex === -1) return;
+      const card = boxCards[currentBoxCardIndex];
+      const masterIndex = cards.findIndex(c => c === card);
+
       if (confirm('هل أنت متأكد من حذف هذه البطاقة؟')) {
-        cards.splice(currentCardIndex, 1);
+        cards.splice(masterIndex, 1);
         editingIndex = -1;
         document.getElementById('form-title').textContent = "إضافة بطاقة جديدة";
         document.getElementById('form-submit-btn').textContent = "حفظ في الصندوق 1";
         document.getElementById('front-input').value = '';
         document.getElementById('back-input').value = '';
         saveState();
-        getNextCard();
+        renderCurrentBox();
       }
     }
 
@@ -467,7 +558,7 @@
     document.getElementById('back-input').addEventListener('input', saveState);
 
     restoreState();
-    getNextCard();
+    selectBox(activeBox);
   </script>
 </body>
 </html>
